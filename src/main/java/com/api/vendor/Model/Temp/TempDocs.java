@@ -17,10 +17,10 @@ public class TempDocs {
 
     private String fileName;
 
-    private String title;
-
     @Lob
-    private byte[] base64;
+    private String file;
+
+    private String documentName;
 
     private Timestamp uploadedAt;
 
@@ -34,8 +34,8 @@ public class TempDocs {
         return "{\n" +
                 "\"documentId\":\"" + documentId + "\"" +
                 ",\n\"fileName\":\"" + fileName + "\"" +
-                ",\n\"title\":\"" + title + "\"" +
-                ",\n\"base64\":\"" + Arrays.toString(base64) +
+                ",\n\"documentName\":\"" + documentName + "\"" +
+                ",\n\"file\":\"" + file +
                 ",\n\"uploadedAt\":\"" + uploadedAt +"\"" +
                 "\n}";
     }

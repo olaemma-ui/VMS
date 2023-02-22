@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class VendorService {
@@ -46,10 +47,13 @@ public class VendorService {
     private final VendorRepo vendorRepo;
     private final TempVendorRepo tempVendorRepo;
     private final TempDocsRepo tempDocsRepo;
+    private final VendorDocsRepo vendorDocsRepo;
     private final ActivityRepo activityRepo;
 
+    private List<Object> documents = Arrays.asList("companyProf", "cac", "companyCert", "amlcftcpQuestionaire", "assessmentQuestionaire", "vat", "tcc");
+
     @Autowired
-    VendorService(Utils utils, ObjectMapper mapper, VendorRepo vendorRepo, TempVendorRepo tempVendorRepo, TempDocsRepo tempDocsRepo, ActivityRepo activityRepo){
+    VendorService(Utils utils, ObjectMapper mapper, VendorRepo vendorRepo, TempVendorRepo tempVendorRepo, TempDocsRepo tempDocsRepo, ActivityRepo activityRepo, VendorDocsRepo vendorDocsRepo){
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         this.mapper = mapper;
         this.utils = utils;
@@ -57,6 +61,7 @@ public class VendorService {
         this.tempVendorRepo = tempVendorRepo;
         this.tempDocsRepo = tempDocsRepo;
         this.activityRepo = activityRepo;
+        this.vendorDocsRepo = vendorDocsRepo;
     }
 
     public ResponseEntity<Response> addVendor(Map<String, String> vendor){
@@ -84,8 +89,8 @@ public class VendorService {
                             tempVendor.setRequestId(requestId);
                             tempVendor.setRemark(vendor.get("remark"));
 
-                            boolean sendMail = utils.sendMail( tempVendor.getOrgEmail(), frontendURL+"?id="+vendorId);
-//                            boolean sendMail = true;
+//                            boolean sendMail = utils.sendMail( tempVendor.getOrgEmail(), frontendURL+"?id="+vendorId);
+                            boolean sendMail = true;
                             if(sendMail){
                                 tempVendorRepo.save(tempVendor);
                                 utils.saveAction(
@@ -120,18 +125,19 @@ public class VendorService {
      * Saves Vendor details for reference purpose
      * */
     public ResponseEntity<Response> vendorSave(
-        String vendorDetails,
-        MultipartFile companyProf,
-        MultipartFile cac,
-        MultipartFile companyCert,
-        MultipartFile amlcftcpQuestionaire,
-        MultipartFile assessmentQuestionaire,
-        MultipartFile vat,
-        MultipartFile tcc
+//        String vendorDetails,
+//        MultipartFile companyProf,
+//        MultipartFile cac,
+//        MultipartFile companyCert,
+//        MultipartFile amlcftcpQuestionaire,
+//        MultipartFile assessmentQuestionaire,
+//        MultipartFile vat,
+//        MultipartFile tcc
+            TempVendor tempVendor
     ){
         reset();
        try{
-           TempVendor tempVendor = mapper.readValue(vendorDetails, TempVendor.class);
+//           TempVendor tempVendor = mapper.readValue(vendorDetails, TempVendor.class);
            responseDescription = "VendorId required";
            Optional.ofNullable(tempVendor.getVendorId()).ifPresent(
                    vendorId -> {
@@ -149,34 +155,41 @@ public class VendorService {
                                            tempVendor.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
                                            tempVendor.setRemark(vendor.getRemark());
 
-                                           Map<String, MultipartFile> files = new HashMap<>();
-                                           files.put("companyCert", companyCert);
-                                           files.put("cac", cac);
-                                           files.put("amlcftcpQuestionaire", amlcftcpQuestionaire);
-                                           files.put("assessmentQuestionaire", assessmentQuestionaire);
-                                           files.put("companyProf", companyProf);
-                                           files.put("cc", tcc);
-                                           files.put("vat", vat);
-                                           List<TempDocs> tempDocsList = new ArrayList<>();
-                                           files.forEach(
-                                                   (k, v) -> {
-                                                       try {
-                                                           TempDocs docs = new TempDocs();
-                                                           docs.setDocumentId(UUID.randomUUID().toString());
-                                                           docs.setFileName(v.getOriginalFilename());
-                                                           docs.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
-                                                           docs.setTempVendor(tempVendor);
-                                                           docs.setBase64(Base64.getEncoder().encode(v.getBytes()));
-                                                           docs.setTitle(k);
-                                                           tempDocsList.add(docs);
-                                                       } catch (IOException e) {
-                                                           responseDescription = "Something went wrong.";
-                                                           e.printStackTrace();
+                                           if(tempVendor.getDocuments() != null)
+                                               tempVendor.getDocuments().forEach(
+                                                       e->{
+                                                           e.setTempVendor(tempVendor);
+                                                           e.setDocumentId(UUID.randomUUID().toString());
                                                        }
-                                                   }
-                                           );
-
-                                           tempVendor.setDocsList(tempDocsList);
+                                               );
+//                                           Map<String, MultipartFile> files = new HashMap<>();
+//                                           files.put("companyCert", companyCert);
+//                                           files.put("cac", cac);
+//                                           files.put("amlcftcpQuestionaire", amlcftcpQuestionaire);
+//                                           files.put("assessmentQuestionaire", assessmentQuestionaire);
+//                                           files.put("companyProf", companyProf);
+//                                           files.put("cc", tcc);
+//                                           files.put("vat", vat);
+//                                           List<TempDocs> tempDocsList = new ArrayList<>();
+//                                           files.forEach(
+//                                                   (k, v) -> {
+//                                                       try {
+//                                                           TempDocs docs = new TempDocs();
+//                                                           docs.setDocumentId(UUID.randomUUID().toString());
+//                                                           docs.setFileName(v.getOriginalFilename());
+//                                                           docs.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
+//                                                           docs.setTempVendor(tempVendor);
+//                                                           docs.setBase64(Base64.getEncoder().encode(v.getBytes()));
+//                                                           docs.setTitle(k);
+//                                                           tempDocsList.add(docs);
+//                                                       } catch (IOException e) {
+//                                                           responseDescription = "Something went wrong.";
+//                                                           e.printStackTrace();
+//                                                       }
+//                                                   }
+//                                           );
+//
+//                                           tempVendor.setDocsList(tempDocsList);
 
                                            System.out.println(tempVendor);
                                            tempVendorRepo.save(tempVendor);
@@ -193,6 +206,7 @@ public class VendorService {
            responseDescription = "Something went wrong.";
            e.printStackTrace();
        }
+
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
 
@@ -202,86 +216,110 @@ public class VendorService {
      * This submit the vendor details provided and awaits approval
      * */
     public ResponseEntity<Response> vendorRegister(
-            String vendorDetails,
-            MultipartFile companyProf,
-            MultipartFile cac,
-            MultipartFile companyCert,
-            MultipartFile amlcftcpQuestionaire,
-            MultipartFile assessmentQuestionaire,
-            MultipartFile vat,
-            MultipartFile tcc
+//            String vendorDetails,
+//            MultipartFile companyProf,
+//            MultipartFile cac,
+//            MultipartFile companyCert,
+//            MultipartFile amlcftcpQuestionaire,
+//            MultipartFile assessmentQuestionaire,
+//            MultipartFile vat,
+//            MultipartFile tcc
+
+            TempVendor tempVendor
     ){
         reset();
         try{
-            TempVendor tempVendor = mapper.readValue(vendorDetails, TempVendor.class);
-            Object[] validate = utils.validate(tempVendor, new String[]{"createdAt", "approvalStatus", "status", "docsList", "action", "updatedAt", "updatedAt", "remark"});
+//            TempVendor tempVendor = mapper.readValue(vendorDetails, TempVendor.class);
+            Object[] validate = utils.validate(tempVendor, new String[]{"createdAt", "approvalStatus", "status", "action", "updatedAt", "updatedAt", "remark"});
             data = tempVendor;
             error = validate[1];
-            if(companyCert != null && cac != null && amlcftcpQuestionaire != null && assessmentQuestionaire !=null && companyProf !=null){
-                if (Boolean.parseBoolean(validate[0].toString())) {
-                    Optional.ofNullable(tempVendor.getVendorId()).ifPresent(
-                            vendorId -> {
-                                responseDescription = "Invalid vendorId.";
-                                tempVendorRepo.findById(tempVendor.getVendorId()).ifPresent(
-                                        vendor -> {
-                                            if (tempVendor.getApprovalStatus() == null){
-                                                if (tempVendor.getOrgEmail().equalsIgnoreCase(vendor.getOrgEmail())) {
-                                                    tempVendor.setOrgName(vendor.getOrgName());
-                                                    tempVendor.setAction("NEW");
-                                                    tempVendor.setStatus("PENDING");
-                                                    tempVendor.setApprovalStatus("PENDING");
-                                                    tempVendor.setInitiatorId(vendor.getInitiatorId());
-                                                    tempVendor.setApproverId(null);
-                                                    tempVendor.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
-                                                    tempVendor.setRequestId(vendor.getRequestId());
-                                                    tempVendor.setRemark(vendor.getRemark());
 
-                                                    Map<String, MultipartFile> files = new HashMap<>();
-                                                    files.put("companyCert", companyCert);
-                                                    files.put("cac", cac);
-                                                    files.put("amlcftcpQuestionaire", amlcftcpQuestionaire);
-                                                    files.put("assessmentQuestionaire", assessmentQuestionaire);
-                                                    files.put("companyProf", companyProf);
-                                                    files.put("vat", vat);
-                                                    files.put("tcc", tcc);
-                                                    List<TempDocs> tempDocsList = new ArrayList<>();
-                                                    files.forEach(
-                                                            (k, v) -> {
-                                                                try {
-                                                                    TempDocs docs = new TempDocs();
-                                                                    docs.setDocumentId(UUID.randomUUID().toString());
-                                                                    docs.setFileName(v.getOriginalFilename());
-                                                                    docs.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
-                                                                    docs.setTempVendor(tempVendor);
-                                                                    docs.setBase64(Base64.getEncoder().encode(v.getBytes()));
-                                                                    docs.setTitle(k);
-                                                                    tempDocsList.add(docs);
-                                                                } catch (IOException e) {
-                                                                    responseDescription = "Something went wrong.";
-                                                                    e.printStackTrace();
-                                                                }
+            if (Boolean.parseBoolean(validate[0].toString())) {
+                Optional.ofNullable(tempVendor.getVendorId()).ifPresent(
+                        vendorId -> {
+                            responseDescription = "Invalid vendorId.";
+                            tempVendorRepo.findById(tempVendor.getVendorId()).ifPresent(
+                                    vendor -> {
+                                        if (tempVendor.getApprovalStatus() == null){
+                                            if (tempVendor.getOrgEmail().equalsIgnoreCase(vendor.getOrgEmail())) {
+                                                tempVendor.setOrgName(vendor.getOrgName());
+                                                tempVendor.setAction("NEW");
+                                                tempVendor.setStatus("PENDING");
+                                                tempVendor.setApprovalStatus("PENDING");
+                                                tempVendor.setInitiatorId(vendor.getInitiatorId());
+                                                tempVendor.setApproverId(null);
+                                                tempVendor.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+                                                tempVendor.setRequestId(vendor.getRequestId());
+                                                tempVendor.setRemark(vendor.getRemark());
+
+                                                AtomicInteger count = new AtomicInteger();
+
+                                                if (tempVendor.getDocuments().size() == 7){
+                                                    tempVendor.getDocuments().forEach(
+                                                            e ->{
+                                                                if (documents.contains(e.getDocumentName())) count.getAndIncrement();
                                                             }
                                                     );
 
-                                                    tempVendor.setDocsList(tempDocsList);
-                                                    tempVendorRepo.save(tempVendor);
-                                                    success(tempVendor);
+                                                    if (count.get() == 7){
+                                                        tempVendor.getDocuments().forEach(
+                                                                e->{
+                                                                    e.setDocumentId(UUID.randomUUID().toString());
+                                                                    e.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
+                                                                    e.setTempVendor(tempVendor);
+                                                                    System.out.println("title = = = = = = = = "+e.getFileName());
+                                                                }
+                                                        );
+                                                        tempVendorRepo.save(tempVendor);
+                                                        success(tempVendor);
+                                                    }else responseDescription = "Expected documents [" +
+                                                                "cac, tcc, vat, companyCert, amlcftcpQuestionaire, assessmentQuestionaire, companyProf" +
+                                                            "]";
 
-                                                }
-                                                else responseDescription = "E-mail mismatch with pre-registered email!";
-                                            }else responseDescription = "Already Registered!";
-                                        }
-                                );
+                                                }else responseDescription = "All Documents are required";
+//                                                    Map<String, MultipartFile> files = new HashMap<>();
+//                                                    files.put("companyCert", companyCert);
+//                                                    files.put("cac", cac);
+//                                                    files.put("amlcftcpQuestionaire", amlcftcpQuestionaire);
+//                                                    files.put("assessmentQuestionaire", assessmentQuestionaire);
+//                                                    files.put("companyProf", companyProf);
+//                                                    files.put("vat", vat);
+//                                                    files.put("tcc", tcc);
+//                                                    List<TempDocs> tempDocsList = new ArrayList<>();
+//                                                    files.forEach(
+//                                                            (k, v) -> {
+//                                                                try {
+//                                                                    TempDocs docs = new TempDocs();
+//                                                                    docs.setDocumentId(UUID.randomUUID().toString());
+//                                                                    docs.setFileName(v.getOriginalFilename());
+//                                                                    docs.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
+//                                                                    docs.setTempVendor(tempVendor);
+//                                                                    docs.setBase64(Base64.getEncoder().encode(v.getBytes()));
+//                                                                    docs.setTitle(k);
+//                                                                    tempDocsList.add(docs);
+//                                                                } catch (IOException e) {
+//                                                                    responseDescription = "Something went wrong.";
+//                                                                    e.printStackTrace();
+//                                                                }
+//                                                            }
+//                                                    );
 
-                            }
-                    );
-                }
-                else responseDescription = "Invalid or required fields";
-            }else responseDescription = "All necessary documents are required!";
+//                                                tempVendor.setDocuments();
+                                            }
+                                            else responseDescription = "E-mail mismatch with pre-registered email!";
+                                        }else responseDescription = "Already Registered!";
+                                    }
+                            );
+
+                        }
+                );
+            }
+            else responseDescription = "Invalid or required fields";
         }catch (Exception e){
             responseDescription = "Something went wrong.";
             e.printStackTrace();
         }
+
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
 
@@ -307,7 +345,6 @@ public class VendorService {
                                                 if (tempVendor.getApprovalStatus().equalsIgnoreCase("PENDING")) {
 
                                                     Optional<Vendor> optionalTempVendor = vendorRepo.findById(tempVendor.getVendorId());
-//                                                    AtomicBoolean pending = new AtomicBoolean(false);
 
                                                     tempVendor.setApproverId(node.get("staffId").asText());
 
@@ -320,12 +357,12 @@ public class VendorService {
                                                             List<VendorDocuments> vendorDocumentsList = vendorRepo.findByVendorId(tempVendor.getVendorId());
 
                                                             //Update the previously uploaded documents with the newly / updated document
-                                                            for (TempDocs tempDocs : tempVendor.getDocsList()) {
+                                                            for (TempDocs tempDocs : tempVendor.getDocuments()) {
                                                                 for (VendorDocuments vendorDocument : vendorDocumentsList) {
                                                                     if (tempDocs.getDocumentId().equalsIgnoreCase(vendorDocument.getDocumentId())) {
-                                                                        vendorDocument.setBase64(tempDocs.getBase64());
+                                                                        vendorDocument.setFile(tempDocs.getFile());
                                                                         vendorDocument.setFileName(tempDocs.getFileName());
-                                                                        vendorDocument.setTitle(tempDocs.getTitle());
+                                                                        vendorDocument.setDocumentName(tempDocs.getDocumentName());
                                                                         vendorDocument.setUploadedAt(tempDocs.getUploadedAt());
                                                                         vendorDocument.setVendor(vendor);
                                                                     }
@@ -334,7 +371,7 @@ public class VendorService {
                                                                 }
                                                             }
                                                         }else{
-                                                            for (TempDocs tempDocs : tempVendor.getDocsList()) {
+                                                            for (TempDocs tempDocs : tempVendor.getDocuments()) {
                                                                 System.out.println("docs");
                                                                 VendorDocuments documents = mapper.convertValue(tempDocs, VendorDocuments.class);
                                                                 documents.setVendor(vendor);
@@ -367,6 +404,7 @@ public class VendorService {
                                                     vendor.setAction(null);
                                                     vendorRepo.save(vendor);
                                                     tempVendorRepo.delete(tempVendor);
+
 //                                                    tempVendor.setApprovalStatus(
 //                                                            (node.get("action").asText().equalsIgnoreCase("APPROVE")
 //                                                                    ? "APPROVED" : "DECLINED")
@@ -387,7 +425,8 @@ public class VendorService {
                                                                     ? "APPROVED" : "DECLINED")
                                                     );
                                                     success(null);
-                                                } else responseDescription = "No pending request or action";
+                                                }
+                                                else responseDescription = "No pending request or action";
                                             } else responseDescription = "No pending request or action";
                                         } else responseDescription = "Invalid action parameter";
                                     }catch (Exception ex){
@@ -483,15 +522,19 @@ public class VendorService {
         try{
             responseDescription = "SUCCESS";
             List<TempVendor> tempVendors = tempVendorRepo.findByStatus("PENDING");
-            tempVendors.forEach(vendor -> {
-                if (!vendor.getAction().equalsIgnoreCase("UPDATE DOCUMENT"))
-                    vendor.setDocsList(null);
+            tempVendors.forEach(tempVendor -> {
+                if (!tempVendor.getAction().equalsIgnoreCase("UPDATE DOCUMENT")) {
+                    tempVendor.setDocuments(null);
+                    tempVendor.setVerifiedClients(null);
+                    tempVendor.setOwnedEquips(null);
+                }
             });
             success(tempVendors);
         }catch(Exception e){
             e.printStackTrace();
             responseDescription = "Something went wrong!";
         }
+
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
 
@@ -522,6 +565,7 @@ public class VendorService {
             e.printStackTrace();
             responseDescription = "Something went wrong!";
         }
+
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
     
@@ -562,11 +606,11 @@ public class VendorService {
                                                    tempDocsList.add(tempDocs);
                                                }
                                        );
-                                       tempVendor.setDocsList(tempDocsList);
+                                       tempVendor.setDocuments(tempDocsList);
 
                                        try {
                                            tempVendorRepo.save(tempVendor);
-                                           tempVendor.setDocsList(Collections.emptyList());
+                                           tempVendor.setDocuments(Collections.emptyList());
                                            utils.saveAction(
                                                    node.get("action").asText().toUpperCase(),
                                                    node.get("staffId").asText(),
@@ -631,19 +675,19 @@ public class VendorService {
                                             tempDocs -> {
                                                 TempDocs documents = new TempDocs();
                                                 documents.setDocumentId(tempDocs.getDocumentId());
-                                                documents.setTitle(tempDocs.getTitle());
-                                                documents.setBase64(tempDocs.getBase64());
+                                                documents.setDocumentName(tempDocs.getDocumentName());
+                                                documents.setFile(tempDocs.getFile());
                                                 documents.setFileName(tempDocs.getFileName());
                                                 documents.setTempVendor(tempVendor);
                                                 vendorDocuments.add(documents);
                                             }
                                     );
                                     tempVendor.setRequestId(requestId);
-                                    tempVendor.setDocsList(vendorDocuments);
+                                    tempVendor.setDocuments(vendorDocuments);
 
                                     try {
                                         tempVendorRepo.save(tempVendor);
-                                        tempVendor.setDocsList(Collections.emptyList());
+                                        tempVendor.setDocuments(Collections.emptyList());
                                         utils.saveAction(
                                                 "UPDATE",
                                                 tempVendor.getInitiatorId(),
@@ -655,7 +699,7 @@ public class VendorService {
                                                 "PENDING"
                                         );
                                         tempVendorRepo.save(tempVendor);
-                                        tempVendor.setDocsList(Collections.emptyList());
+                                        tempVendor.setDocuments(Collections.emptyList());
                                         success(tempVendor);
                                     } catch (Exception e) {
                                         responseDescription = "Something ent wrong!";
@@ -664,101 +708,94 @@ public class VendorService {
 
                                 }
                         );
-                    }
+                    }else responseDescription = "Awaiting pending approval!";
                 }else responseDescription = "Invalid or required fields";
             }else responseDescription = "Not an Initiator!";
         }catch (Exception e){
             responseDescription = "Something went wrong.";
             e.printStackTrace();
         }
+
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
 
 
-    public ResponseEntity<Response> updateDocs(MultipartFile file, String node){
+    public ResponseEntity<Response> updateDocument(Map<String, Object> document){
         reset();
         String requestId = UUID.randomUUID().toString();
+        List<Object> errorList = new ArrayList<>();
+        if (document.containsKey("vendorId") && document.containsKey("documents")){
 
-        try{
-            JsonNode details = mapper.readValue (node, JsonNode.class);
-            System.out.println(details);
-//            String staffRole = utils.role(details.get("staffId").asText()).get(0).get("roleName").asText();
-            String staffRole = "INITIATOR";
-            if (staffRole.equalsIgnoreCase("INITIATOR")) {
+            responseDescription = "Vendor does not exist!";
+            vendorRepo.findById(document.get("vendorId").toString()).ifPresent(
+                    vendor->{
+                        if (!vendor.getStatus().equalsIgnoreCase("BLACKLIST")){
 
-                if (details.has("staffId") && details.has("remark") && details.has("documentId") && details.has("vendorId")) {
-                    responseDescription = "Vendor does not exist or not active!";
-                    vendorRepo.findById(details.get("vendorId").asText()).ifPresent(
-                            vendor -> {
-                                Optional<TempVendor> optionalTempVendor = tempVendorRepo.findById(details.get("vendorId").asText());
-                                AtomicBoolean pending = new AtomicBoolean(false);
-                                optionalTempVendor.ifPresent(
-                                        e-> pending.set(e.getApprovalStatus().equalsIgnoreCase("PENDING"))
-                                );
+                            Optional<TempVendor> optionalTempVendor = tempVendorRepo.findById(document.get("vendorId").toString());
+                            AtomicBoolean pending = new AtomicBoolean(false);
+                            optionalTempVendor.ifPresent(
+                                    e-> pending.set(e.getApprovalStatus().equalsIgnoreCase("PENDING"))
+                            );
 
-                                if (!pending.get()){
-                                    TempVendor tempVendor = mapper.convertValue(vendor, TempVendor.class);
-                                    tempVendor.setApprovalStatus("PENDING");
-                                    tempVendor.setAction("UPDATE DOCUMENT");
-                                    tempVendor.setStatus(null);
-                                    tempVendor.setRequestId(requestId);
+                            if (!pending.get()){
 
-                                    List<TempDocs> vendorDocuments = new ArrayList<>();
-                                    vendor.getDocuments().forEach(
-                                            docs->{
+                                TempVendor tempVendor = mapper.convertValue(vendor, TempVendor.class);
+                                tempVendor.setApprovalStatus("PENDING");
+                                tempVendor.setAction("UPDATE DOCUMENT");
+                                tempVendor.setStatus(null);
+                                tempVendor.setRequestId(requestId);
 
-                                                System.out.println("dociD = "+docs.getDocumentId());
-                                                System.out.println("details dociD = "+details.get("documentId").asText());
+                                List<TempDocs> tempDocsList = new ArrayList<>();
+                                List<?> tempDocs = mapper.convertValue(document.get("documents"), List.class);
+                                tempDocs.forEach(
+                                        (tempDocObj)->{
+                                            Object[] validate = utils.validate(tempDocObj, new String[]{"tempVendor", "uploadedAt", "message"});
+                                            errorList.add(validate[1]);
+                                            if (Boolean.parseBoolean(validate[0].toString())){
 
-                                                TempDocs documents = new TempDocs();
-                                                if (details.get("documentId").asText().equalsIgnoreCase(docs.getDocumentId())){
+                                                TempDocs tempDoc = mapper.convertValue(tempDocObj, TempDocs.class);
+                                                vendorDocsRepo.findById(tempDoc.getDocumentId()).ifPresent(
+                                                        vendorDocuments -> {
+                                                            tempDoc.setDocumentName(vendorDocuments.getDocumentName());
+                                                            tempDoc.setTempVendor(tempVendor);
+                                                            tempDocsList.add(tempDoc);
+                                                        }
+                                                );
+
+                                                if (tempDocsList.size() == tempDocs.size()){
+                                                    tempVendor.setDocuments(tempDocsList);
+
                                                     try {
-                                                        documents.setDocumentId(docs.getDocumentId());
-                                                        documents.setTitle(docs.getTitle());
-                                                        documents.setBase64(Base64.getEncoder().encode(file.getBytes()));
-                                                        documents.setFileName(file.getOriginalFilename());
-                                                        documents.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
-                                                    } catch (IOException e) {
-                                                        responseDescription = "Error occurred uploading file!.";
+                                                        utils.saveAction(
+                                                                "UPDATE DOCUMENT",
+                                                                tempVendor.getInitiatorId(),
+                                                                null,
+                                                                tempVendor.getVendorId(),
+                                                                tempVendor.getRemark(),
+                                                                null,
+                                                                requestId,
+                                                                "PENDING"
+                                                        );
+                                                        tempVendorRepo.save(tempVendor);
+//                                            tempVendor.setDocuments(Collections.emptyList());
+                                                        success(tempVendor);
+                                                    } catch (Exception e) {
+                                                        responseDescription = "Something ent wrong!";
                                                         e.printStackTrace();
                                                     }
-                                                    vendorDocuments.add(documents);
-                                                    documents.setTempVendor(tempVendor);
                                                 }
-                                            }
-                                    );
-                                    tempVendor.setDocsList(vendorDocuments);
-
-                                    try {
-                                        tempVendorRepo.save(tempVendor);
-
-                                        System.out.println("docs update = "+ tempVendor.toString());
-                                        utils.saveAction(
-                                                "UPDATE DOCUMENT",
-                                                tempVendor.getInitiatorId(),
-                                                null,
-                                                tempVendor.getVendorId(),
-                                                details.get("remark").asText(),
-                                                null,
-                                                requestId,
-                                                "PENDING"
-                                        );
-                                        success(null);
-                                    } catch (Exception e) {
-                                        responseDescription = "Something ent wrong!";
-                                        e.printStackTrace();
-                                    }
-                                }
+                                                else responseDescription = "One of the documents field is invalid!";
+                                            }else responseDescription = "All document fields!";
+                                        }
+                                );
 
                             }
-                    );
-                }
-                else responseDescription = "All fields are required [staffId, remark, documentId, vendorId]";
-            }else responseDescription = "Not an Initiator!";
-        }catch (Exception e){
-            responseDescription = "Something went wrong!";
-            e.printStackTrace();
-        }
+
+                        }else responseDescription = "Vendor blacklisted!";
+                    }
+            );
+        }else responseDescription = "All fields are required!";
+
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
 
@@ -779,7 +816,12 @@ public class VendorService {
                 );
                 if (response.getStatusCodeValue() == 200){
                     if (!response.getBody().get("responseCode").asText().equalsIgnoreCase("99")){
-                        success(utils.role(response.getBody().get("staffId").asText()));
+
+                        success(new HashMap<String, Object>(){{
+                            put("staffId", response.getBody().get("staffId").asText());
+                            put("role", utils.role(response.getBody().get("staffId").asText()));
+                        }});
+
                     }else responseDescription = response.getBody().get("responseDescription").asText();
                 }
 

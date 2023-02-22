@@ -28,28 +28,14 @@ public class VendorController {
         return vendorService.addVendor(vendor);
     }
 
-    @PostMapping(value = {"vendor/register"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    private ResponseEntity<Response> registerVendor(
-            @RequestParam String vendorDetails,
-            @RequestParam MultipartFile companyProf,
-            @RequestParam MultipartFile cac,
-            @RequestParam MultipartFile companyCert,
-            @RequestParam MultipartFile amlcftcpQuestionaire,
-            @RequestParam MultipartFile assessmentQuestionaire
-    ){
-        return vendorService.vendorRegister(vendorDetails, companyProf, cac, companyCert, amlcftcpQuestionaire, assessmentQuestionaire);
+    @PostMapping(value = {"vendor/register"}, consumes = MediaType.APPLICATION_JSON_VALUE)
+    private ResponseEntity<Response> registerVendor(@RequestBody TempVendor tempVendor){
+        return vendorService.vendorRegister(tempVendor);
     }
 
-    @PostMapping(value = {"vendor/save"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    private ResponseEntity<Response> saveVendor(
-            @RequestParam("vendorDetails") String vendorDetails,
-            @RequestParam("companyProf") MultipartFile companyProf,
-            @RequestParam("cac") MultipartFile cac,
-            @RequestParam("companyCert") MultipartFile companyCert,
-            @RequestParam("amlcftcpQuestionaire") MultipartFile amlcftcpQuestionaire,
-            @RequestParam("assessmentQuestionaire") MultipartFile assessmentQuestionaire
-    ){
-        return vendorService.vendorSave(vendorDetails, companyProf, cac, companyCert, amlcftcpQuestionaire, assessmentQuestionaire);
+    @PostMapping(value = {"vendor/save"}, consumes = MediaType.APPLICATION_JSON_VALUE)
+    private ResponseEntity<Response> saveVendor(@RequestBody TempVendor tempVendor){
+        return vendorService.vendorSave(tempVendor);
     }
 
 

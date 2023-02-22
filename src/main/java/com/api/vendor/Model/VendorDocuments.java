@@ -15,10 +15,10 @@ public class VendorDocuments {
 
     private String fileName;
 
-    private String title;
-
     @Lob
-    private byte[] base64;
+    private String file;
+
+    private String documentName;
 
     private Timestamp uploadedAt;
 
