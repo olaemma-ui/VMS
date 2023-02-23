@@ -18,7 +18,7 @@ public class TempDocs {
     private String fileName;
 
     @Lob
-    private String file;
+    private String base64;
 
     private String documentName;
 
@@ -33,9 +33,9 @@ public class TempDocs {
     public String toString() {
         return "{\n" +
                 "\"documentId\":\"" + documentId + "\"" +
-                ",\n\"fileName\":\"" + fileName + "\"" +
+                ",\n\"base64\":\"" + fileName + "\"" +
                 ",\n\"documentName\":\"" + documentName + "\"" +
-                ",\n\"file\":\"" + file +
+                ",\n\"file\":\"" + base64 +
                 ",\n\"uploadedAt\":\"" + uploadedAt +"\"" +
                 "\n}";
     }

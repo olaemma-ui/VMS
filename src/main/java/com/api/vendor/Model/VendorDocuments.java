@@ -16,7 +16,7 @@ public class VendorDocuments {
     private String fileName;
 
     @Lob
-    private String file;
+    private String base64;
 
     private String documentName;
 

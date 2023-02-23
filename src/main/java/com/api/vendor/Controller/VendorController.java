@@ -73,8 +73,17 @@ public class VendorController {
     private ResponseEntity<Response> getBlacklistVendor(){
         return vendorService.getBlacklistVendor();
     }
-    
-    
+
+    @GetMapping(value = "vendor/workingCapital/list")
+    private ResponseEntity<Response> getWorkingCapital(){
+        return vendorService.workingCapital();
+    }
+
+    @GetMapping(value = "vendor/businessType/list")
+    private ResponseEntity<Response> getBusinessType(){
+        return vendorService.businessTypeList();
+    }
+
     @PostMapping(value = {"staff/vendor/blacklist"})
     private ResponseEntity<Response> blacklistVendor(@RequestBody JsonNode node){
         return vendorService.blacklist$whitelistVendor(node);
@@ -91,9 +100,15 @@ public class VendorController {
     }
 
     @PutMapping(value = {"staff/vendor/updateDocs"})
-    private ResponseEntity<Response> updateVendor(@RequestParam MultipartFile file, @RequestParam String details){
-        return vendorService.updateDocs(file, details);
+    private ResponseEntity<Response> updateVendorDocument(@RequestBody Map<String, Object> document){
+        return vendorService.updateDocument(document);
     }
+
+
+//    @PutMapping(value = {"staff/vendor/updateDocs"})
+//    private ResponseEntity<Response> updateVendor(@RequestParam MultipartFile file, @RequestParam String details){
+//        return vendorService.updateDocs(file, details);
+//    }
 
     @GetMapping(value = {"staff/activityLog"})
     private ResponseEntity<Response> getActivityLog() {

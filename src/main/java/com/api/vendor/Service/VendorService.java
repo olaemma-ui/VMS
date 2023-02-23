@@ -41,6 +41,13 @@ public class VendorService {
     @Value("${SunTrust.ui.url}")
     private String frontendURL;
 
+    @Value("#{'${vendor.workingCapital}'.split(',')}")
+    private List<String> workingCapitals;
+
+
+    @Value("#{'${vendor.businessType}'.split(',')}")
+    private List<String> businessTypes;
+
 
     private final Utils utils;
     private final ObjectMapper mapper;
@@ -69,8 +76,8 @@ public class VendorService {
         String requestId = UUID.randomUUID().toString();
         if (vendor.containsKey("email") && vendor.containsKey("vendorName") && vendor.containsKey("staffId")&& vendor.containsKey("remark")){
             try{
-//                String staffRole = utils.role(vendor.get("staffId")).get(0).get("roleName").asText();
-                String staffRole = "INITIATOR";
+                String staffRole = utils.role(vendor.get("staffId")).get(0).get("roleName").asText();
+//                String staffRole = "INITIATOR";
                 if (staffRole != null){
                     if (staffRole.equalsIgnoreCase("INITIATOR")){
 
@@ -89,8 +96,8 @@ public class VendorService {
                             tempVendor.setRequestId(requestId);
                             tempVendor.setRemark(vendor.get("remark"));
 
-//                            boolean sendMail = utils.sendMail( tempVendor.getOrgEmail(), frontendURL+"?id="+vendorId);
-                            boolean sendMail = true;
+                            boolean sendMail = utils.sendMail( tempVendor.getOrgEmail(), frontendURL+"?id="+vendorId);
+//                            boolean sendMail = true;
                             if(sendMail){
                                 tempVendorRepo.save(tempVendor);
                                 utils.saveAction(
@@ -124,20 +131,9 @@ public class VendorService {
     /**
      * Saves Vendor details for reference purpose
      * */
-    public ResponseEntity<Response> vendorSave(
-//        String vendorDetails,
-//        MultipartFile companyProf,
-//        MultipartFile cac,
-//        MultipartFile companyCert,
-//        MultipartFile amlcftcpQuestionaire,
-//        MultipartFile assessmentQuestionaire,
-//        MultipartFile vat,
-//        MultipartFile tcc
-            TempVendor tempVendor
-    ){
+    public ResponseEntity<Response> vendorSave(TempVendor tempVendor){
         reset();
        try{
-//           TempVendor tempVendor = mapper.readValue(vendorDetails, TempVendor.class);
            responseDescription = "VendorId required";
            Optional.ofNullable(tempVendor.getVendorId()).ifPresent(
                    vendorId -> {
@@ -162,37 +158,6 @@ public class VendorService {
                                                            e.setDocumentId(UUID.randomUUID().toString());
                                                        }
                                                );
-//                                           Map<String, MultipartFile> files = new HashMap<>();
-//                                           files.put("companyCert", companyCert);
-//                                           files.put("cac", cac);
-//                                           files.put("amlcftcpQuestionaire", amlcftcpQuestionaire);
-//                                           files.put("assessmentQuestionaire", assessmentQuestionaire);
-//                                           files.put("companyProf", companyProf);
-//                                           files.put("cc", tcc);
-//                                           files.put("vat", vat);
-//                                           List<TempDocs> tempDocsList = new ArrayList<>();
-//                                           files.forEach(
-//                                                   (k, v) -> {
-//                                                       try {
-//                                                           TempDocs docs = new TempDocs();
-//                                                           docs.setDocumentId(UUID.randomUUID().toString());
-//                                                           docs.setFileName(v.getOriginalFilename());
-//                                                           docs.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
-//                                                           docs.setTempVendor(tempVendor);
-//                                                           docs.setBase64(Base64.getEncoder().encode(v.getBytes()));
-//                                                           docs.setTitle(k);
-//                                                           tempDocsList.add(docs);
-//                                                       } catch (IOException e) {
-//                                                           responseDescription = "Something went wrong.";
-//                                                           e.printStackTrace();
-//                                                       }
-//                                                   }
-//                                           );
-//
-//                                           tempVendor.setDocsList(tempDocsList);
-
-                                           System.out.println(tempVendor);
-                                           tempVendorRepo.save(tempVendor);
                                            success(tempVendor);
                                        }else responseDescription = "E-mail mismatch with pre-registered email!";
                                    }else responseDescription = "Already Registered!";
@@ -215,21 +180,9 @@ public class VendorService {
      * Register vendor.
      * This submit the vendor details provided and awaits approval
      * */
-    public ResponseEntity<Response> vendorRegister(
-//            String vendorDetails,
-//            MultipartFile companyProf,
-//            MultipartFile cac,
-//            MultipartFile companyCert,
-//            MultipartFile amlcftcpQuestionaire,
-//            MultipartFile assessmentQuestionaire,
-//            MultipartFile vat,
-//            MultipartFile tcc
-
-            TempVendor tempVendor
-    ){
+    public ResponseEntity<Response> vendorRegister(TempVendor tempVendor){
         reset();
         try{
-//            TempVendor tempVendor = mapper.readValue(vendorDetails, TempVendor.class);
             Object[] validate = utils.validate(tempVendor, new String[]{"createdAt", "approvalStatus", "status", "action", "updatedAt", "updatedAt", "remark"});
             data = tempVendor;
             error = validate[1];
@@ -267,7 +220,6 @@ public class VendorService {
                                                                     e.setDocumentId(UUID.randomUUID().toString());
                                                                     e.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
                                                                     e.setTempVendor(tempVendor);
-                                                                    System.out.println("title = = = = = = = = "+e.getFileName());
                                                                 }
                                                         );
                                                         tempVendorRepo.save(tempVendor);
@@ -275,36 +227,7 @@ public class VendorService {
                                                     }else responseDescription = "Expected documents [" +
                                                                 "cac, tcc, vat, companyCert, amlcftcpQuestionaire, assessmentQuestionaire, companyProf" +
                                                             "]";
-
                                                 }else responseDescription = "All Documents are required";
-//                                                    Map<String, MultipartFile> files = new HashMap<>();
-//                                                    files.put("companyCert", companyCert);
-//                                                    files.put("cac", cac);
-//                                                    files.put("amlcftcpQuestionaire", amlcftcpQuestionaire);
-//                                                    files.put("assessmentQuestionaire", assessmentQuestionaire);
-//                                                    files.put("companyProf", companyProf);
-//                                                    files.put("vat", vat);
-//                                                    files.put("tcc", tcc);
-//                                                    List<TempDocs> tempDocsList = new ArrayList<>();
-//                                                    files.forEach(
-//                                                            (k, v) -> {
-//                                                                try {
-//                                                                    TempDocs docs = new TempDocs();
-//                                                                    docs.setDocumentId(UUID.randomUUID().toString());
-//                                                                    docs.setFileName(v.getOriginalFilename());
-//                                                                    docs.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
-//                                                                    docs.setTempVendor(tempVendor);
-//                                                                    docs.setBase64(Base64.getEncoder().encode(v.getBytes()));
-//                                                                    docs.setTitle(k);
-//                                                                    tempDocsList.add(docs);
-//                                                                } catch (IOException e) {
-//                                                                    responseDescription = "Something went wrong.";
-//                                                                    e.printStackTrace();
-//                                                                }
-//                                                            }
-//                                                    );
-
-//                                                tempVendor.setDocuments();
                                             }
                                             else responseDescription = "E-mail mismatch with pre-registered email!";
                                         }else responseDescription = "Already Registered!";
@@ -329,8 +252,8 @@ public class VendorService {
 
         if (node.has("staffId") && node.has("vendorId") && node.has("action") && node.has("remark")){
             try{
-//                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
-                String staffRole = "APPROVER";
+                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
+//                String staffRole = "APPROVER";
                 if (staffRole != null){
 
                     if (staffRole.equalsIgnoreCase("APPROVER")){
@@ -360,7 +283,7 @@ public class VendorService {
                                                             for (TempDocs tempDocs : tempVendor.getDocuments()) {
                                                                 for (VendorDocuments vendorDocument : vendorDocumentsList) {
                                                                     if (tempDocs.getDocumentId().equalsIgnoreCase(vendorDocument.getDocumentId())) {
-                                                                        vendorDocument.setFile(tempDocs.getFile());
+                                                                        vendorDocument.setBase64(tempDocs.getBase64());
                                                                         vendorDocument.setFileName(tempDocs.getFileName());
                                                                         vendorDocument.setDocumentName(tempDocs.getDocumentName());
                                                                         vendorDocument.setUploadedAt(tempDocs.getUploadedAt());
@@ -372,7 +295,6 @@ public class VendorService {
                                                             }
                                                         }else{
                                                             for (TempDocs tempDocs : tempVendor.getDocuments()) {
-                                                                System.out.println("docs");
                                                                 VendorDocuments documents = mapper.convertValue(tempDocs, VendorDocuments.class);
                                                                 documents.setVendor(vendor);
                                                                 vendorDocuments.add(documents);
@@ -404,14 +326,6 @@ public class VendorService {
                                                     vendor.setAction(null);
                                                     vendorRepo.save(vendor);
                                                     tempVendorRepo.delete(tempVendor);
-
-//                                                    tempVendor.setApprovalStatus(
-//                                                            (node.get("action").asText().equalsIgnoreCase("APPROVE")
-//                                                                    ? "APPROVED" : "DECLINED")
-//                                                    );
-//                                                    tempVendor.setDocsList(!(tempVendor.getAction().equalsIgnoreCase("UPDATE DOCUMENT"))
-//                                                            ? Collections.emptyList() : tempVendor.getDocsList()
-//                                                    );
 
                                                     utils.saveAction(
                                                             null,
@@ -538,7 +452,7 @@ public class VendorService {
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
 
-    
+
     public ResponseEntity<Response> getBlacklistVendor(){
         reset();
 
@@ -568,7 +482,7 @@ public class VendorService {
 
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
-    
+
 
     public ResponseEntity<Response> blacklist$whitelistVendor(JsonNode node){
         reset();
@@ -576,8 +490,8 @@ public class VendorService {
 
         if (node.has("staffId") && node.has("vendorId") && node.has("action") && node.has("remark")){
             if (node.get("action").asText().equalsIgnoreCase("BLACKLIST") || node.get("action").asText().equalsIgnoreCase("WHITELIST")){
-//                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
-                String staffRole = "INITIATOR";
+                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
+//                String staffRole = "INITIATOR";
                 if (staffRole.equalsIgnoreCase("INITIATOR")){
                    try{
                        responseDescription = "Invalid vendorId";
@@ -648,8 +562,8 @@ public class VendorService {
         reset();
         String requestId = UUID.randomUUID().toString();
         try{
-//            String staffRole = utils.role(tempVendor.getInitiatorId()).get(0).get("roleName").asText();
-            String staffRole = "INITIATOR";
+            String staffRole = utils.role(tempVendor.getInitiatorId()).get(0).get("roleName").asText();
+//            String staffRole = "INITIATOR";
             if (staffRole.equalsIgnoreCase("INITIATOR")){
                 Object[] validate = utils.validate(tempVendor, new String[]{"approverId", "approvalStatus", "status", "action", "createdAt","docsList", "approverRemark", "updatedAt"});
                 error = validate[1];
@@ -663,7 +577,6 @@ public class VendorService {
 
                     if (!pending.get()) {
                         responseDescription = "Invalid vendorId or not active";
-                        System.out.println("id = " + tempVendor.getVendorId());
                         vendorRepo.findById(tempVendor.getVendorId()).ifPresent(
                                 vendor ->
                                 {
@@ -676,7 +589,7 @@ public class VendorService {
                                                 TempDocs documents = new TempDocs();
                                                 documents.setDocumentId(tempDocs.getDocumentId());
                                                 documents.setDocumentName(tempDocs.getDocumentName());
-                                                documents.setFile(tempDocs.getFile());
+                                                documents.setBase64(tempDocs.getBase64());
                                                 documents.setFileName(tempDocs.getFileName());
                                                 documents.setTempVendor(tempVendor);
                                                 vendorDocuments.add(documents);
@@ -722,6 +635,7 @@ public class VendorService {
 
     public ResponseEntity<Response> updateDocument(Map<String, Object> document){
         reset();
+
         String requestId = UUID.randomUUID().toString();
         List<Object> errorList = new ArrayList<>();
         if (document.containsKey("vendorId") && document.containsKey("documents")){
@@ -744,7 +658,6 @@ public class VendorService {
                                 tempVendor.setAction("UPDATE DOCUMENT");
                                 tempVendor.setStatus(null);
                                 tempVendor.setRequestId(requestId);
-
                                 List<TempDocs> tempDocsList = new ArrayList<>();
                                 List<?> tempDocs = mapper.convertValue(document.get("documents"), List.class);
                                 tempDocs.forEach(
@@ -752,7 +665,6 @@ public class VendorService {
                                             Object[] validate = utils.validate(tempDocObj, new String[]{"tempVendor", "uploadedAt", "message"});
                                             errorList.add(validate[1]);
                                             if (Boolean.parseBoolean(validate[0].toString())){
-
                                                 TempDocs tempDoc = mapper.convertValue(tempDocObj, TempDocs.class);
                                                 vendorDocsRepo.findById(tempDoc.getDocumentId()).ifPresent(
                                                         vendorDocuments -> {
@@ -766,12 +678,13 @@ public class VendorService {
                                                     tempVendor.setDocuments(tempDocsList);
 
                                                     try {
+
                                                         utils.saveAction(
                                                                 "UPDATE DOCUMENT",
                                                                 tempVendor.getInitiatorId(),
                                                                 null,
                                                                 tempVendor.getVendorId(),
-                                                                tempVendor.getRemark(),
+                                                                "Vendor Update Document",
                                                                 null,
                                                                 requestId,
                                                                 "PENDING"
@@ -791,15 +704,28 @@ public class VendorService {
 
                             }
 
-                        }else responseDescription = "Vendor blacklisted!";
+                        }
+                        else responseDescription = "Vendor blacklisted!";
                     }
             );
         }else responseDescription = "All fields are required!";
 
+        data = document;
+        error = errorList;
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
 
+    public ResponseEntity<Response>  businessTypeList(){
+        reset();
+        success(businessTypes);
+        return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
+    }
 
+    public ResponseEntity<Response>  workingCapital(){
+        reset();
+        success(workingCapitals);
+        return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
+    }
 
     public ResponseEntity<Response> login(JsonNode node){
         reset();
