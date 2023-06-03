@@ -13,19 +13,19 @@ public class ActivityLog {
     @Id
     private String id;
 
-    private String initiatorId;
-
-    private String approverId;
-
     private String action;
 
     private String vendorId;
 
+    private String initiatorId;
+    private String initiatorName;
+    private String initiatorRemark;
+
+    private String approverId;
+    private String approverName;
+    private String approverRemark;
+
     private String status;
 
     private Timestamp createdAt;
-
-    private String initiatorRemark;
-
-    private String approverRemark;
 }

@@ -55,8 +55,10 @@ public class Vendor {
     private List<OwnedEquip> ownedEquips;
 
     private String initiatorId;
+    private String initiatorName;
 
     private String approverId;
+    private String approverName;
 
     private Timestamp createdAt;
 

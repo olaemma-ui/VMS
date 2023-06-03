@@ -15,7 +15,7 @@ import java.util.UUID;
 public class OwnedEquip {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    private String id;
 
     private String description;
 

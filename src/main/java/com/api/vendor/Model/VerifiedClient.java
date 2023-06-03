@@ -15,7 +15,7 @@ import java.util.UUID;
 public class VerifiedClient {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    private String id;
 
     private String compName;
 

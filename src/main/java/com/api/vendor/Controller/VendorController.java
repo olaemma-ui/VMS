@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -38,12 +37,10 @@ public class VendorController {
         return vendorService.vendorSave(tempVendor);
     }
 
-
     @PostMapping(value = {"staff/vendor/approval"}, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Response> approveVendor(@RequestBody JsonNode node){
         return vendorService.approveVendor(node);
     }
-
 
     @PostMapping(value = {"staff/vendor/details"}, consumes = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Response> getVendorDetails(@RequestBody JsonNode node){
@@ -62,6 +59,10 @@ public class VendorController {
         return vendorService.getPendingRequest();
     }
 
+    @GetMapping(value = {"staff/vendor/list"}, consumes = MediaType.APPLICATION_JSON_VALUE)
+    private ResponseEntity<Response> getAllVendors(){
+        return vendorService.getAllVendors();
+    }
 
     @GetMapping(value = {"staff/vendor/active/list"}, consumes = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Response> getActiveVendors(){
@@ -103,12 +104,6 @@ public class VendorController {
     private ResponseEntity<Response> updateVendorDocument(@RequestBody Map<String, Object> document){
         return vendorService.updateDocument(document);
     }
-
-
-//    @PutMapping(value = {"staff/vendor/updateDocs"})
-//    private ResponseEntity<Response> updateVendor(@RequestParam MultipartFile file, @RequestParam String details){
-//        return vendorService.updateDocs(file, details);
-//    }
 
     @GetMapping(value = {"staff/activityLog"})
     private ResponseEntity<Response> getActivityLog() {

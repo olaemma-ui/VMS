@@ -49,8 +49,13 @@ public class TempVendor {
 
     @JsonIgnore
     private String requestId;
+
     private String initiatorId;
+    private String initiatorName;
+
     private String approverId;
+    private String approverName;
+
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private String action;

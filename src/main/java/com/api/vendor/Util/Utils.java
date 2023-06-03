@@ -217,21 +217,32 @@ public class Utils {
      * @param fields
      * @apiNote
      * */
-    public void saveAction(String action, String initiatorId, String approverId,String vendorId, String initiatorRemark, String approverRemark, String requestId, String status) throws Exception {
+    public void saveAction(
+            String action, String initiatorId, String approverId,
+            String vendorId, String initiatorRemark, String approverRemark,
+            String requestId, String status, String initiatorName, String approverName
+    ) throws Exception {
         try {
+
             Optional<ActivityLog> log = activityRepo.findById(requestId);
             ActivityLog activityLog = new ActivityLog();
             activityLog.setId(requestId);
             activityLog.setAction(action == null ? log.get().getAction(): action);
             activityLog.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
             activityLog.setVendorId(vendorId);
+
+
             activityLog.setApproverId(approverId);
+            activityLog.setApproverRemark(approverRemark);
+            activityLog.setApproverName(approverName);
+
             activityLog.setInitiatorId(initiatorId);
             activityLog.setInitiatorRemark(initiatorRemark == null ? log.get().getInitiatorRemark(): initiatorRemark);
-            activityLog.setApproverRemark(approverRemark);
+            activityLog.setInitiatorName(initiatorName);
             activityLog.setStatus(status);
 
             activityRepo.save(activityLog);
+
         }catch (Exception e){
             e.printStackTrace();
             throw new Exception(e);
