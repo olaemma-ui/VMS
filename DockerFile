@@ -1,9 +1,15 @@
+#
+# Build stage
+#
 FROM maven:3.8.2-jdk-11 AS build
 COPY . .
-RUN mvn clean package -Pprod -DskipTests
+RUN mvn clean package -DskipTests
 
-
-FROM openJdk:11-jdk-slim
-COPY --from=build  /target/vendor.jar vms.jar
-EXPOSE 7009
-ENTRYPOINT ["java","-jar","/vms.jar"]
+#
+# Package stage
+#
+FROM openjdk:11-jdk-slim
+COPY --from=build /vendor-0.0.1.jar vms.jar
+# ENV PORT=8080
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","vms.jar"]
