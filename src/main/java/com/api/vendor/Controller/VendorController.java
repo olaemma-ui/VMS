@@ -47,7 +47,6 @@ public class VendorController {
         return vendorService.getVendorDetails(node);
     }
 
-
     @GetMapping(value = {"staff/vendor/declined/list"}, consumes = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Response> getDeclinedVendors(){
         return vendorService.getDeclinedVendor();

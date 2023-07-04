@@ -57,7 +57,7 @@ public class VendorService {
     private final VendorDocsRepo vendorDocsRepo;
     private final ActivityRepo activityRepo;
 
-    private List<Object> documents = Arrays.asList("companyProf", "cac", "companyCert", "amlcftcpQuestionaire", "assessmentQuestionaire", "vat", "tcc");
+    private final List<Object> documents = Arrays.asList("companyProf", "cac", "companyCert", "amlcftcpQuestionaire", "assessmentQuestionaire", "vat", "tcc");
 
     @Autowired
     VendorService(Utils utils, ObjectMapper mapper, VendorRepo vendorRepo, TempVendorRepo tempVendorRepo, TempDocsRepo tempDocsRepo, ActivityRepo activityRepo, VendorDocsRepo vendorDocsRepo){
@@ -342,7 +342,7 @@ public class VendorService {
 //                String staffRole = "APPROVER";
                 if (staffRole != null){
 
-                    if (staffRole.equalsIgnoreCase("APPROVER")){
+                    if (staffRole.equalsIgnoreCase("APPROVER") || staffRole.equalsIgnoreCase("APPROVAL")){
 
                         responseDescription = "Vendor does not exist or No pending approval!";
                         tempVendorRepo.findById(node.get("vendorId").asText()).ifPresent(
@@ -496,8 +496,6 @@ public class VendorService {
                                 success(vendor);
                             }
                     );
-                }else {
-                    responseDescription = "Vendor does not exist";
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -515,7 +513,11 @@ public class VendorService {
         try{
             responseDescription = "SUCCESS";
             List<Vendor> vendors = vendorRepo.findByStatus("DECLINED");
-            vendors.forEach(vendor -> vendor.setDocuments(null));
+            vendors.forEach(vendor -> {
+                vendor.setDocuments(Collections.emptyList());
+                vendor.setVerifiedClients(Collections.emptyList());
+                vendor.setOwnedEquips(Collections.emptyList());
+            });
             success(vendors);
         }catch(Exception e){
             e.printStackTrace();
@@ -531,7 +533,11 @@ public class VendorService {
         try{
             responseDescription = "SUCCESS";
             List<Vendor> vendors = vendorRepo.findByStatus("ACTIVE");
-            vendors.forEach(vendor -> vendor.setDocuments(null));
+            vendors.forEach(vendor -> {
+                vendor.setDocuments(Collections.emptyList());
+                vendor.setVerifiedClients(Collections.emptyList());
+                vendor.setOwnedEquips(Collections.emptyList());
+            });
             success(vendors);
         }catch(Exception e){
             e.printStackTrace();
@@ -550,9 +556,9 @@ public class VendorService {
             List<TempVendor> tempVendors = tempVendorRepo.findByStatus("PENDING");
             tempVendors.forEach(tempVendor -> {
                 if (!tempVendor.getAction().equalsIgnoreCase("UPDATE DOCUMENT")) {
-                    tempVendor.setDocuments(null);
-                    tempVendor.setVerifiedClients(null);
-                    tempVendor.setOwnedEquips(null);
+                    tempVendor.setDocuments(Collections.emptyList());
+                    tempVendor.setVerifiedClients(Collections.emptyList());
+                    tempVendor.setOwnedEquips(Collections.emptyList());
                 }
             });
             success(tempVendors);
@@ -571,7 +577,11 @@ public class VendorService {
         try{
             responseDescription = "SUCCESS";
             List<Vendor> vendors = vendorRepo.findByStatus("BLACKLIST");
-            vendors.forEach(vendor -> vendor.setDocuments(null));
+            vendors.forEach(vendor -> {
+                vendor.setDocuments(Collections.emptyList());
+                vendor.setVerifiedClients(Collections.emptyList());
+                vendor.setOwnedEquips(Collections.emptyList());
+            });
             success(vendors);
         }catch(Exception e){
             e.printStackTrace();
@@ -848,14 +858,19 @@ public class VendorService {
             List<TempVendor> tempVendors = tempVendorRepo.findAll();
             for (TempVendor tempVendor : tempVendors) {
                 tempVendor.setDocuments(Collections.emptyList());
+                tempVendor.setVerifiedClients(Collections.emptyList());
+                tempVendor.setOwnedEquips(Collections.emptyList());
             }
 
             List<Vendor> vendors = vendorRepo.findAll();
             for (Vendor vendor : vendors) {
                 vendor.setDocuments(Collections.emptyList());
+                vendor.setDocuments(Collections.emptyList());
+                vendor.setVerifiedClients(Collections.emptyList());
+                vendor.setOwnedEquips(Collections.emptyList());
             }
 
-            List allVendor = Collections.emptyList();
+            List<Object> allVendor = new ArrayList<>(Collections.emptyList());
             allVendor.addAll(tempVendors);
             allVendor.addAll(vendors);
 
