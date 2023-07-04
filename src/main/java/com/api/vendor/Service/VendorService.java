@@ -613,7 +613,7 @@ public class VendorService {
         if (node.has("staffId") && node.has("vendorId") && node.has("action") && node.has("remark") && node.has("staffName")){
             if (node.get("action").asText().equalsIgnoreCase("BLACKLIST") || node.get("action").asText().equalsIgnoreCase("WHITELIST")){
 
-                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
+//                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
 //                String staffRole = "INITIATOR";
                 if (staffRole.equalsIgnoreCase("INITIATOR")){
                    try{
