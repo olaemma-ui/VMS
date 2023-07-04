@@ -1,9 +1,10 @@
-FROM maven:3.9.0-eclipse-temurin-17-alpine as build
+FROM ubuntu:latest AS build
+RUN ap-get update
+RUN ap-get install opendjdk-1.8-jdk -y
 COPY . .
-RUN mvn clean package -DskipTests
 
+FROM openjdk:17-jdk-slim
+EXPOSE 8080
+COPY --from=build /target/*.jar vendor.jar
 
-FROM jdk:1.8
-COPY --from=build  /target/*.jar vendor.jar
-EXPOSE 7009
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java","-jar","/vendor-0.0.1.jar"]
