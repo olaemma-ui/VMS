@@ -64,7 +64,7 @@ public class TempVendor {
     private String remark;
 
 
-    @OneToMany(mappedBy = "tempVendor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "tempVendor", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TempDocs> documents;
 
     @OneToMany(mappedBy = "tempVendor", cascade = CascadeType.ALL, orphanRemoval = true)
