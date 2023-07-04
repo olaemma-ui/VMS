@@ -1,13 +1,15 @@
+user:
+  build:
+    context: ./
+    dockerfile: ./Dockerfile
+
+
 FROM maven:3.9.0-eclipse-temurin-17-alpine as build
 COPY . .
 RUN mvn clean package -DskipTests
+
 
 FROM jdk:1.8
 COPY --from=build  /target/*.jar vendor.jar
 EXPOSE 7009
 ENTRYPOINT ["java","-jar","/app.jar"]
-
-user:
-  build:
-    context: ./
-    dockerfile: ./Dockerfile
