@@ -1,9 +1,9 @@
-FROM maven:3.9.0-eclipse-temurin-17-alpine as build
+FROM maven:3.8.2-jdk-11 AS build
 COPY . .
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Pprod -DskipTests
 
 
-FROM jdk:1.8
-COPY --from=build  /target/*.jar vendor.jar
+FROM openJdk:11-jdk-slim
+COPY --from=build  /target/vendor.jar vms.jar
 EXPOSE 7009
-ENTRYPOINT ["java","-jar","/vendor.jar"]
+ENTRYPOINT ["java","-jar","/vms.jar"]
