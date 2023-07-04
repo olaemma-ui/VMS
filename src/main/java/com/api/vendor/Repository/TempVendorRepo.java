@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface TempVendorRepo extends JpaRepository<TempVendor, String> {
+    @Transactional
     @Query(value = "SELECT u.vendorId FROM TempVendor u")
     List<String> findAllId();
 
