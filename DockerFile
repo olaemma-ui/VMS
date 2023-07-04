@@ -2,8 +2,8 @@ FROM eclipse-temuFROM eclipse-temurin:17-jdk-alpine
                  VOLUME /tmp
                  COPY target/*.jar app.jar
                  ENTRYPOINT ["java","-jar","/app.jar"]
-                 EXPOSE 8080rin:17-jdk-alpine
+                 EXPOSE 7009rin:17-jdk-alpine
 VOLUME /tmp
 COPY target/*.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
-EXPOSE 8080
+EXPOSE 7009
