@@ -45,7 +45,13 @@ public class VendorController {
 
     @PostMapping(value = {"staff/vendor/details"}, consumes = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Response> getVendorDetails(@RequestBody JsonNode node){
-        return vendorService.getVendorDetails(node);
+        return vendorService.getVendorDetails(node, "");
+    }
+
+
+    @PostMapping(value = {"staff/pendingVendor/details"}, consumes = MediaType.APPLICATION_JSON_VALUE)
+    private ResponseEntity<Response> getPendingVendorDetails(@RequestBody JsonNode node){
+        return vendorService.getVendorDetails(node, "pending");
     }
 
     @GetMapping(value = {"staff/vendor/declined/list"}, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -100,10 +106,10 @@ public class VendorController {
         return vendorService.updateVendorDetails(vendor);
     }
 
-    @PutMapping(value = {"staff/vendor/updateDocs"})
-    private ResponseEntity<Response> updateVendorDocument(@RequestBody Map<String, Object> document){
-        return vendorService.updateDocument(document);
-    }
+//    @PutMapping(value = {"staff/vendor/updateDocs"})
+//    private ResponseEntity<Response> updateVendorDocument(@RequestBody Map<String, Object> document){
+//        return vendorService.updateDocument(document);
+//    }
 
     @GetMapping(value = {"staff/activityLog"})
     private ResponseEntity<Response> getActivityLog() {

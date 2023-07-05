@@ -23,9 +23,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.awt.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -58,7 +60,7 @@ public class VendorService {
     private final VendorDocsRepo vendorDocsRepo;
     private final ActivityRepo activityRepo;
 
-    private final List<Object> documents = Arrays.asList("companyProf", "cac", "companyCert", "amlcftcpQuestionaire", "assessmentQuestionaire", "vat", "tcc");
+    private final List<String> documents = Arrays.asList("companyProf", "cac", "companyCert", "amlcftcpQuestionaire", "assessmentQuestionaire", "vat", "tcc");
 
     @Autowired
     VendorService(Utils utils, ObjectMapper mapper, VendorRepo vendorRepo, TempVendorRepo tempVendorRepo, TempDocsRepo tempDocsRepo, ActivityRepo activityRepo, VendorDocsRepo vendorDocsRepo){
@@ -82,7 +84,7 @@ public class VendorService {
                 if (staffRole != null){
                     if (staffRole.equalsIgnoreCase("INITIATOR")){
 
-                        if(!tempVendorRepo.findByEmail(vendor.get("email")).isPresent() && !vendorRepo.findByEmail(vendor.get("email")).isPresent()){
+                        if(!tempVendorRepo.findByEmail(vendor.get("email")).isPresent() && !vendorRepo.findByEmail(vendor.get("email"), "0").isPresent()){
                             String vendorId = utils.genId(tempVendorRepo.findAllId(), new int[]{10, 15});
                             TempVendor tempVendor = new TempVendor();
                             tempVendor.setOrgName(vendor.get("vendorName"));
@@ -451,11 +453,12 @@ public class VendorService {
                                                             tempVendor.getInitiatorName(),
                                                             tempVendor.getApproverName()
                                                     );
-                                                    success(this.data);
+                                                    success(node);
                                                 }
                                                 else responseDescription = "No pending request or action";
                                             } else responseDescription = "No pending request or action";
-                                        } else responseDescription = "Invalid action parameter";
+                                        }
+                                        else responseDescription = "Invalid action parameter";
                                     }catch (Exception ex){
                                         ex.printStackTrace();
                                         responseDescription = "Something went wrong";
@@ -478,19 +481,23 @@ public class VendorService {
     }
 
     @Transactional
-    public ResponseEntity<Response> getVendorDetails(JsonNode node){
+    public ResponseEntity<Response> getVendorDetails(JsonNode node, String detailsType){
         reset();
 
         if (node.has("vendorId")){
             try{
                 AtomicBoolean present = new AtomicBoolean(false);
-                tempVendorRepo.findById(node.get("vendorId").asText()).ifPresent(
-                        tempVendor -> {
-                            present.set(true);
-                            success(tempVendor);
-                        }
-                );
+                if (detailsType.equalsIgnoreCase("pending"))
+                    tempVendorRepo.findById(node.get("vendorId").asText()).ifPresent(
+                            tempVendor -> {
+                                present.set(true);
+                                success(tempVendor);
+                            }
+                    );
+
                 if (!present.get()){
+
+                    success(new HashMap<String, String>(){});
                     vendorRepo.findById(node.get("vendorId").asText()).ifPresent(
                             vendor -> {
                                 present.set(true);
@@ -696,60 +703,77 @@ public class VendorService {
                 data = tempVendor;
                 if(Boolean.parseBoolean(validate[0].toString())){
                     Optional<TempVendor> optionalTempVendor = tempVendorRepo.findById(tempVendor.getVendorId());
-                    AtomicBoolean pending = new AtomicBoolean(false);
-                    optionalTempVendor.ifPresent(
-                            e-> pending.set(e.getApprovalStatus().equalsIgnoreCase("PENDING"))
-                    );
-
-                    if (!pending.get()) {
-                        responseDescription = "Invalid vendorId or not active";
-                        vendorRepo.findById(tempVendor.getVendorId()).ifPresent(
-                                vendor ->
-                                {
-                                    tempVendor.setApprovalStatus("PENDING");
-                                    tempVendor.setAction("UPDATE");
-                                    tempVendor.setStatus(null);
-                                    List<TempDocs> vendorDocuments = new ArrayList<>();
-                                    vendor.getDocuments().forEach(
-                                            tempDocs -> {
-                                                TempDocs documents = new TempDocs();
-                                                documents.setDocumentId(tempDocs.getDocumentId());
-                                                documents.setDocumentName(tempDocs.getDocumentName());
-                                                documents.setBase64(tempDocs.getBase64());
-                                                documents.setFileName(tempDocs.getFileName());
-                                                documents.setTempVendor(tempVendor);
-                                                vendorDocuments.add(documents);
-                                            }
-                                    );
-                                    tempVendor.setRequestId(requestId);
-                                    tempVendor.setDocuments(vendorDocuments);
-
-                                    try {
-                                        tempVendorRepo.save(tempVendor);
-                                        tempVendor.setDocuments(Collections.emptyList());
-                                        utils.saveAction(
-                                                "UPDATE",
-                                                tempVendor.getInitiatorId(),
-                                                null,
-                                                tempVendor.getVendorId(),
-                                                tempVendor.getRemark(),
-                                                null,
-                                                requestId,
-                                                "PENDING",
-                                                tempVendor.getInitiatorName(),
-                                                null
-                                        );
-                                        tempVendorRepo.save(tempVendor);
-                                        tempVendor.setDocuments(Collections.emptyList());
-                                        success(tempVendor);
-                                    } catch (Exception e) {
-                                        responseDescription = "Something ent wrong!";
-                                        e.printStackTrace();
-                                    }
-
-                                }
+                    if (!tempVendorRepo.findByEmail(tempVendor.getOrgEmail()).isPresent() && !vendorRepo.findByEmail(tempVendor.getOrgEmail(), tempVendor.getVendorId()).isPresent()){
+                        AtomicBoolean pending = new AtomicBoolean(false);
+                        optionalTempVendor.ifPresent(
+                                e-> pending.set(e.getApprovalStatus().equalsIgnoreCase("PENDING"))
                         );
-                    }else responseDescription = "Awaiting pending approval!";
+
+                        if (!pending.get()) {
+                            responseDescription = "Invalid vendorId or not active";
+                            vendorRepo.findById(tempVendor.getVendorId()).ifPresent(
+                                    vendor ->
+                                    {
+                                        tempVendor.setApprovalStatus("PENDING");
+                                        tempVendor.setAction("UPDATE");
+                                        tempVendor.setStatus(null);
+
+                                        System.out.println(tempVendor.getVerifiedClients());
+                                        System.out.println(tempVendor.getOwnedEquips());
+
+//                                        List<TempDocs> vendorDocuments = new ArrayList<>();
+                                        tempVendor.getDocuments().forEach(
+                                                tempDocs -> {
+                                                    tempDocs.setTempVendor(tempVendor);
+                                                }
+                                        );
+
+                                        List<TempOwnedEquip> tempOwnedEquipList = new ArrayList<>();
+                                        tempVendor.getOwnedEquips().forEach(
+                                                equip ->{
+                                                    equip.setTempVendor(tempVendor);
+                                                    tempOwnedEquipList.add(equip);
+                                                }
+                                        );
+
+                                        tempVendor.setOwnedEquips(tempOwnedEquipList);
+
+                                        List<TempVerifiedClient> tempVerifiedClientList = new ArrayList<>();
+                                        tempVendor.getVerifiedClients().forEach(
+                                                clientele -> {
+                                                    clientele.setTempVendor(tempVendor);
+                                                    tempVerifiedClientList.add(clientele);
+                                                }
+                                        );
+                                        tempVendor.setVerifiedClients(tempVerifiedClientList);
+                                        tempVendor.setRequestId(requestId);
+
+                                        try {
+                                            utils.saveAction(
+                                                    "UPDATE",
+                                                    tempVendor.getInitiatorId(),
+                                                    null,
+                                                    tempVendor.getVendorId(),
+                                                    tempVendor.getRemark(),
+                                                    null,
+                                                    requestId,
+                                                    "PENDING",
+                                                    tempVendor.getInitiatorName(),
+                                                    null
+                                            );
+                                            tempVendorRepo.save(tempVendor);
+                                            tempVendor.setDocuments(Collections.emptyList());
+                                            success(tempVendor);
+                                        } catch (Exception e) {
+                                            responseDescription = "Something ent wrong!";
+                                            e.printStackTrace();
+                                        }
+
+                                    }
+                            );
+                        }else responseDescription = "Awaiting pending approval!";
+                    }else responseDescription = "Vendor email already exist.";
+
                 }else responseDescription = "Invalid or required fields";
             }else responseDescription = "Not an Initiator!";
         }catch (Exception e){
@@ -763,7 +787,7 @@ public class VendorService {
 
     public ResponseEntity<Response> updateDocument(Map<String, Object> document){
         reset();
-
+        List<String> documentsName = documents;
         String requestId = UUID.randomUUID().toString();
         List<Object> errorList = new ArrayList<>();
         if (document.containsKey("vendorId") && document.containsKey("documents") && document.containsKey("staffId") && document.containsKey("staffName")){
@@ -795,34 +819,38 @@ public class VendorService {
                                    List<?> tempDocs = mapper.convertValue(document.get("documents"), List.class);
                                    tempDocs.forEach(
                                            (tempDocObj)->{
-                                               Object[] validate = utils.validate(tempDocObj, new String[]{"tempVendor", "uploadedAt", "message"});
+                                               Object[] validate = utils.validate(tempDocObj, new String[]{"tempVendor", "uploadedAt", "documentId"});
                                                errorList.add(validate[1]);
                                                if (Boolean.parseBoolean(validate[0].toString())){
                                                    TempDocs tempDoc = mapper.convertValue(tempDocObj, TempDocs.class);
-                                                   vendorDocsRepo.findById(tempDoc.getDocumentId()).ifPresent(
-                                                           vendorDocuments -> {
-                                                               tempDoc.setDocumentName(vendorDocuments.getDocumentName());
-                                                               tempDoc.setTempVendor(tempVendor);
-                                                               tempDocsList.add(tempDoc);
-                                                           }
-                                                   );
+                                                   if (documentsName.contains(tempDoc.getFileName())){
+                                                       tempDoc.setTempVendor(tempVendor);
+                                                       tempDocsList.add(tempDoc);
+                                                       documentsName.remove(tempDoc.getFileName());
+                                                   }
+//                                                   vendorDocsRepo.findById(tempDoc.getDocumentId()).ifPresent(
+//                                                           vendorDocuments -> {
+//                                                               tempDoc.setDocumentName(vendorDocuments.getDocumentName());
+//                                                               tempDoc.setTempVendor(tempVendor);
+//                                                               tempDocsList.add(tempDoc);
+//                                                           }
+//                                                   );
 
                                                    if (tempDocsList.size() == tempDocs.size()){
                                                        tempVendor.setDocuments(tempDocsList);
-
                                                        try {
 
                                                            utils.saveAction(
-                                                                   "UPDATE DOCUMENT",
-                                                                   tempVendor.getInitiatorId(),
-                                                                   null,
-                                                                   tempVendor.getVendorId(),
-                                                                   "Vendor Update Document",
-                                                                   null,
-                                                                   requestId,
-                                                                   "PENDING",
-                                                                   document.get("staffName").toString(),
-                                                                   null
+                                                               "UPDATE DOCUMENT",
+                                                               tempVendor.getInitiatorId(),
+                                                               null,
+                                                               tempVendor.getVendorId(),
+                                                               "Vendor Update Document",
+                                                               null,
+                                                               requestId,
+                                                               "PENDING",
+                                                               document.get("staffName").toString(),
+                                                               null
                                                            );
                                                            tempVendorRepo.save(tempVendor);
 //                                            tempVendor.setDocuments(Collections.emptyList());
@@ -833,11 +861,12 @@ public class VendorService {
                                                        }
                                                    }
                                                    else responseDescription = "One of the documents field is invalid!";
-                                               }else responseDescription = "All document fields!";
+                                               }
+                                               else responseDescription = "All fields are required!";
                                            }
                                    );
 
-                               }
+                               }else responseDescription = "Awaiting pending approval!";
 
                            }
                            else responseDescription = "Vendor blacklisted!";
@@ -856,6 +885,7 @@ public class VendorService {
         reset();
 
         try{
+
             List<TempVendor> tempVendors = tempVendorRepo.findAll();
             for (TempVendor tempVendor : tempVendors) {
                 tempVendor.setDocuments(Collections.emptyList());
@@ -863,14 +893,17 @@ public class VendorService {
                 tempVendor.setOwnedEquips(Collections.emptyList());
             }
 
+
             List<Vendor> vendors = vendorRepo.findAll();
             for (Vendor vendor : vendors) {
-                vendor.setDocuments(Collections.emptyList());
+                boolean rem =  tempVendors.removeIf(
+                        e -> e.getVendorId()
+                                .equalsIgnoreCase(vendor.getVendorId()));
+
                 vendor.setDocuments(Collections.emptyList());
                 vendor.setVerifiedClients(Collections.emptyList());
                 vendor.setOwnedEquips(Collections.emptyList());
             }
-
             List<Object> allVendor = new ArrayList<>(Collections.emptyList());
             allVendor.addAll(tempVendors);
             allVendor.addAll(vendors);

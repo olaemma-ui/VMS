@@ -18,8 +18,8 @@ public interface VendorRepo extends JpaRepository<Vendor, String> {
     List<Vendor> findByStatus(String status);
 
     @Transactional
-    @Query(value = "SELECT u FROM Vendor u WHERE u.orgEmail=:orgEmail")
-    Optional<TempVendor> findByEmail(String orgEmail);
+    @Query(value = "SELECT u FROM Vendor u WHERE u.orgEmail=:orgEmail AND u.vendorId <>:vendorId")
+    Optional<Vendor> findByEmail(String orgEmail, String vendorId);
 
     @Transactional
     @Query(value = "SELECT u FROM VendorDocuments u WHERE u.vendor.vendorId =:id")
