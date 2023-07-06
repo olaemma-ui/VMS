@@ -43,6 +43,12 @@ public class VendorController {
         return vendorService.approveVendor(node);
     }
 
+    @PostMapping(value = {"staff/vendor/decline"}, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Response> declineVendor(@RequestBody JsonNode node){
+        return vendorService.approveVendor(node);
+    }
+
+
     @PostMapping(value = {"staff/vendor/details"}, consumes = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Response> getVendorDetails(@RequestBody JsonNode node){
         return vendorService.getVendorDetails(node, "");

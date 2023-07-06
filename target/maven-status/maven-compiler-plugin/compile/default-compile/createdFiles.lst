@@ -10,6 +10,7 @@ com\api\vendor\Repository\TempDocsRepo.class
 com\api\vendor\Service\VendorService.class
 com\api\vendor\Model\VendorDocuments.class
 com\api\vendor\Model\Temp\TempVerifiedClient.class
+com\api\vendor\Service\VendorService$2.class
 com\api\vendor\Util\Utils.class
 com\api\vendor\Model\OwnedEquip.class
 com\api\vendor\Controller\VendorController.class
