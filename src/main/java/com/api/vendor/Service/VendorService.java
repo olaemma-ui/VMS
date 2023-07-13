@@ -79,8 +79,8 @@ public class VendorService {
         String requestId = UUID.randomUUID().toString();
         if (vendor.containsKey("email") && vendor.containsKey("vendorName") && vendor.containsKey("staffId")&& vendor.containsKey("remark") && vendor.containsKey("staffName")){
             try{
-//                String staffRole = utils.role(vendor.get("staffId")).get(0).get("roleName").asText();
-                String staffRole = "INITIATOR";
+                String staffRole = utils.role(vendor.get("staffId")).get(0).get("roleName").asText();
+//                String staffRole = "INITIATOR";
                 if (staffRole != null){
                     if (staffRole.equalsIgnoreCase("INITIATOR")){
 
@@ -99,8 +99,8 @@ public class VendorService {
                             tempVendor.setRequestId(requestId);
                             tempVendor.setRemark(vendor.get("remark"));
 
-//                            boolean sendMail = utils.sendMail( tempVendor.getOrgEmail(), frontendURL+"?id="+vendorId);
-                            boolean sendMail = true;
+                            boolean sendMail = utils.sendMail( tempVendor.getOrgEmail(), frontendURL+"?id="+vendorId);
+//                            boolean sendMail = true;
                             if(sendMail){
                                 tempVendorRepo.save(tempVendor);
                                 utils.saveAction(
@@ -113,7 +113,9 @@ public class VendorService {
                                         requestId,
                                         "PENDING",
                                         vendor.get("staffName"),
-                                        null
+                                        null,
+                                        tempVendor.getOrgName(),
+                                        tempVendor.getOrgEmail()
                                     );
                                 success(tempVendor);
                             }else responseDescription = "Sorry! Error occurred sending email.";
@@ -341,8 +343,8 @@ public class VendorService {
         data = node;
         if (node.has("staffId") && node.has("staffName") && node.has("vendorId") && node.has("action") && node.has("remark")){
             try{
-//                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
-                String staffRole = "APPROVER";
+                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
+//                String staffRole = "APPROVER";
                 if (staffRole != null){
 
                     if (staffRole.equalsIgnoreCase("APPROVER") || staffRole.equalsIgnoreCase("APPROVAL")){
@@ -451,7 +453,9 @@ public class VendorService {
                                                             (node.get("action").asText().equalsIgnoreCase("APPROVE")
                                                                     ? "APPROVED" : "DECLINED"),
                                                             tempVendor.getInitiatorName(),
-                                                            tempVendor.getApproverName()
+                                                            tempVendor.getApproverName(),
+                                                            tempVendor.getOrgName(),
+                                                            tempVendor.getOrgEmail()
                                                     );
                                                     success(node);
                                                 }
@@ -480,7 +484,7 @@ public class VendorService {
         return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
 
-    @Transactional
+//    @Transactional
     public ResponseEntity<Response> getVendorDetails(JsonNode node, String detailsType){
         reset();
 
@@ -621,8 +625,8 @@ public class VendorService {
         if (node.has("staffId") && node.has("vendorId") && node.has("action") && node.has("remark") && node.has("staffName")){
             if (node.get("action").asText().equalsIgnoreCase("BLACKLIST") || node.get("action").asText().equalsIgnoreCase("WHITELIST")){
 
-//                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
-                String staffRole = "INITIATOR";
+                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
+//                String staffRole = "INITIATOR";
                 if (staffRole.equalsIgnoreCase("INITIATOR")){
                    try{
                        responseDescription = "Invalid vendorId";
@@ -666,7 +670,9 @@ public class VendorService {
                                                    requestId,
                                                    "PENDING",
                                                    node.get("staffName").asText(),
-                                                   null
+                                                   null,
+                                                   tempVendor.getOrgName(),
+                                                   tempVendor.getOrgEmail()
                                            );
                                            success(null);
                                        } catch (Exception e) {
@@ -695,8 +701,8 @@ public class VendorService {
         reset();
         String requestId = UUID.randomUUID().toString();
         try{
-//            String staffRole = utils.role(tempVendor.getInitiatorId()).get(0).get("roleName").asText();
-            String staffRole = "INITIATOR";
+            String staffRole = utils.role(tempVendor.getInitiatorId()).get(0).get("roleName").asText();
+//            String staffRole = "INITIATOR";
             if (staffRole.equalsIgnoreCase("INITIATOR")){
                 Object[] validate = utils.validate(tempVendor, new String[]{"approverId", "approvalStatus", "approverName", "status", "action", "createdAt","docsList", "approverRemark", "updatedAt"});
                 error = validate[1];
@@ -759,7 +765,9 @@ public class VendorService {
                                                     requestId,
                                                     "PENDING",
                                                     tempVendor.getInitiatorName(),
-                                                    null
+                                                    null,
+                                                    tempVendor.getOrgName(),
+                                                    tempVendor.getOrgEmail()
                                             );
                                             tempVendorRepo.save(tempVendor);
                                             tempVendor.setDocuments(Collections.emptyList());
@@ -792,8 +800,8 @@ public class VendorService {
         List<Object> errorList = new ArrayList<>();
         if (document.containsKey("vendorId") && document.containsKey("documents") && document.containsKey("staffId") && document.containsKey("staffName")){
 
-//            String staffRole = utils.role(document.get("staffId").toString()).get(0).get("roleName").asText();
-            String staffRole = "INITIATOR";
+            String staffRole = utils.role(document.get("staffId").toString()).get(0).get("roleName").asText();
+//            String staffRole = "INITIATOR";
            if (staffRole.equalsIgnoreCase("INITIATOR")){
                responseDescription = "Vendor does not exist Or not active!";
                vendorRepo.findById(document.get("vendorId").toString()).ifPresent(
@@ -850,7 +858,9 @@ public class VendorService {
                                                                requestId,
                                                                "PENDING",
                                                                document.get("staffName").toString(),
-                                                               null
+                                                               null,
+                                                                   tempVendor.getOrgName(),
+                                                                   tempVendor.getOrgEmail()
                                                            );
                                                            tempVendorRepo.save(tempVendor);
 //                                            tempVendor.setDocuments(Collections.emptyList());

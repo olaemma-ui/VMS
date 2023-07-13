@@ -214,13 +214,13 @@ public class Utils {
 
     /**
      * @param action
-     * @param fields
      * @apiNote
      * */
     public void saveAction(
             String action, String initiatorId, String approverId,
             String vendorId, String initiatorRemark, String approverRemark,
-            String requestId, String status, String initiatorName, String approverName
+            String requestId, String status, String initiatorName, String approverName,
+            String vendorName, String vendorEmail
     ) throws Exception {
         try {
 
@@ -228,9 +228,13 @@ public class Utils {
             ActivityLog activityLog = new ActivityLog();
             activityLog.setId(requestId);
             activityLog.setAction(action == null ? log.get().getAction(): action);
+            activityLog.setVendorName(action == null ? log.get().getVendorName(): vendorName);
+            activityLog.setVendorEmail(action == null ? log.get().getVendorEmail(): vendorEmail);
             activityLog.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
-            activityLog.setVendorId(vendorId);
 
+            activityLog.setVendorId(vendorId);
+            activityLog.setVendorEmail(vendorEmail);
+            activityLog.setVendorName(vendorName);
 
             activityLog.setApproverId(approverId);
             activityLog.setApproverRemark(approverRemark);

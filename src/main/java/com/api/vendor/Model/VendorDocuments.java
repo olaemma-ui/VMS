@@ -16,7 +16,7 @@ public class VendorDocuments {
     private String fileName;
 
     @Lob
-    @Basic(fetch = FetchType.EAGER)
+//    @Basic(fetch = FetchType.EAGER)
     private String base64;
 
     private String documentName;

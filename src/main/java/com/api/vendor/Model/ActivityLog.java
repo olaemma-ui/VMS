@@ -16,6 +16,8 @@ public class ActivityLog {
     private String action;
 
     private String vendorId;
+    private String vendorName;
+    private String vendorEmail;
 
     private String initiatorId;
     private String initiatorName;

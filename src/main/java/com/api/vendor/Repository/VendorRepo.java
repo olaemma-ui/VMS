@@ -13,15 +13,15 @@ import java.util.Optional;
 
 @Repository
 public interface VendorRepo extends JpaRepository<Vendor, String> {
-    @Transactional
+//    @Transactional
     @Query(value = "SELECT u FROM Vendor u WHERE u.status =:status")
     List<Vendor> findByStatus(String status);
 
-    @Transactional
+//    @Transactional
     @Query(value = "SELECT u FROM Vendor u WHERE u.orgEmail=:orgEmail AND u.vendorId <>:vendorId")
     Optional<Vendor> findByEmail(String orgEmail, String vendorId);
 
-    @Transactional
+//    @Transactional
     @Query(value = "SELECT u FROM VendorDocuments u WHERE u.vendor.vendorId =:id")
     List<VendorDocuments> findByVendorId(String id);
 }
