@@ -1,5 +1,6 @@
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Controller\VendorController.java
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Util\Utils.java
+C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Repository\DocumentTypeRepo.java
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Model\Temp\TempVendor.java
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Model\Vendor.java
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Model\VerifiedClient.java
@@ -12,6 +13,7 @@ C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\ve
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Model\ActivityLog.java
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Repository\ActivityRepo.java
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Repository\TempVendorRepo.java
+C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Model\DocumentTypeTable.java
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Model\Temp\TempVerifiedClient.java
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\Model\VendorDocuments.java
 C:\Users\Ola Emma\Documents\SunTrust Application\vendor\src\main\java\com\api\vendor\VendorManagementSystemApplication.java
