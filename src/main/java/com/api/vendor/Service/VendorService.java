@@ -60,10 +60,12 @@ public class VendorService {
     private final VendorDocsRepo vendorDocsRepo;
     private final ActivityRepo activityRepo;
 
+    private final DocumentTypeRepo documentTypeRepo;
+
     private final List<String> documents = Arrays.asList("companyProf", "cac", "companyCert", "amlcftcpQuestionaire", "assessmentQuestionaire", "vat", "tcc");
 
     @Autowired
-    VendorService(Utils utils, ObjectMapper mapper, VendorRepo vendorRepo, TempVendorRepo tempVendorRepo, TempDocsRepo tempDocsRepo, ActivityRepo activityRepo, VendorDocsRepo vendorDocsRepo){
+    VendorService(Utils utils, ObjectMapper mapper, VendorRepo vendorRepo, TempVendorRepo tempVendorRepo, TempDocsRepo tempDocsRepo, ActivityRepo activityRepo, VendorDocsRepo vendorDocsRepo, DocumentTypeRepo documentTypeRepo){
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         this.mapper = mapper;
         this.utils = utils;
@@ -72,6 +74,19 @@ public class VendorService {
         this.tempDocsRepo = tempDocsRepo;
         this.activityRepo = activityRepo;
         this.vendorDocsRepo = vendorDocsRepo;
+        this.documentTypeRepo = documentTypeRepo;
+    }
+
+
+    public ResponseEntity<Response> getAllDocuments(){
+        reset();
+        try {
+            success(documentTypeRepo.findAll());
+        }catch (Exception e){
+            responseDescription = "Something went wrong";
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(new Response(success, responseCode, responseDescription, data, error), HttpStatus.OK);
     }
 
     public ResponseEntity<Response> addVendor(Map<String, String> vendor){

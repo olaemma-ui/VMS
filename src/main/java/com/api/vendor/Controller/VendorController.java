@@ -55,6 +55,7 @@ public class VendorController {
     }
 
 
+
     @PostMapping(value = {"staff/pendingVendor/details"}, consumes = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Response> getPendingVendorDetails(@RequestBody JsonNode node){
         return vendorService.getVendorDetails(node, "pending");
@@ -90,6 +91,13 @@ public class VendorController {
     @GetMapping(value = "vendor/workingCapital/list")
     private ResponseEntity<Response> getWorkingCapital(){
         return vendorService.workingCapital();
+    }
+
+
+
+    @GetMapping(value = "vendor/documentType/list")
+    private ResponseEntity<Response> getDocumetList(){
+        return vendorService.getAllDocuments();
     }
 
     @GetMapping(value = "vendor/businessType/list")
