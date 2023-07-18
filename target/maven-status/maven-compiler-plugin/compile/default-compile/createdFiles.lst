@@ -1,5 +1,7 @@
 com\api\vendor\Repository\ActivityRepo.class
 com\api\vendor\Model\Vendor.class
+com\api\vendor\Repository\DocumentTypeRepo.class
+com\api\vendor\Model\DocumentTypeTable.class
 com\api\vendor\VendorManagementSystemApplication.class
 com\api\vendor\Model\Temp\TempDocs.class
 com\api\vendor\Model\Temp\TempVendor.class

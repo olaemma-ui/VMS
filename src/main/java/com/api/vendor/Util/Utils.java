@@ -119,7 +119,7 @@ public class Utils {
         });
 
         regex.put("text", new String[]{
-                "\\w",
+                "^[0-9A-Za-z\\s\\w]$",
                 "Invalid text value"
         });
         System.out.println("data = "+data);

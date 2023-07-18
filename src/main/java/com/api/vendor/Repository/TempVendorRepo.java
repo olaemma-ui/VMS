@@ -12,23 +12,23 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface TempVendorRepo extends JpaRepository<TempVendor, String> {
-//    @Transactional
+    @Transactional
     @Query(value = "SELECT u.vendorId FROM TempVendor u")
     List<String> findAllId();
 
-//    @Transactional
+    @Transactional
     @Query(value = "SELECT u FROM TempVendor u WHERE u.orgEmail=:orgEmail")
     Optional<TempVendor> findByEmail(String orgEmail);
 
-//    @Transactional
+    @Transactional
     @Query(value = "SELECT u FROM TempVendor u WHERE u.approvalStatus =:status")
     List<TempVendor> findByStatus(String status);
 
-//    @Transactional
+    @Transactional
     @Query(value = "SELECT u FROM TempVendor u WHERE u.approvalStatus ='DECLINED' AND u.status='DECLINED'")
     List<TempVendor> findByDeclined();
 
-//    @Transactional
+    @Transactional
     @Query(value = "SELECT u FROM TempVendor u WHERE u.status ='BLACKLIST'")
     List<TempVendor> findBlackList();
 

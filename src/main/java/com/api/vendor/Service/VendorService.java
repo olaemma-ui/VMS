@@ -94,8 +94,8 @@ public class VendorService {
         String requestId = UUID.randomUUID().toString();
         if (vendor.containsKey("email") && vendor.containsKey("vendorName") && vendor.containsKey("staffId")&& vendor.containsKey("remark") && vendor.containsKey("staffName")){
             try{
-                String staffRole = utils.role(vendor.get("staffId")).get(0).get("roleName").asText();
-//                String staffRole = "INITIATOR";
+//                String staffRole = utils.role(vendor.get("staffId")).get(0).get("roleName").asText();
+                String staffRole = "INITIATOR";
                 if (staffRole != null){
                     if (staffRole.equalsIgnoreCase("INITIATOR")){
 
@@ -114,8 +114,8 @@ public class VendorService {
                             tempVendor.setRequestId(requestId);
                             tempVendor.setRemark(vendor.get("remark"));
 
-                            boolean sendMail = utils.sendMail( tempVendor.getOrgEmail(), frontendURL+"?id="+vendorId);
-//                            boolean sendMail = true;
+//                            boolean sendMail = utils.sendMail( tempVendor.getOrgEmail(), frontendURL+"?id="+vendorId);
+                            boolean sendMail = true;
                             if(sendMail){
                                 tempVendorRepo.save(tempVendor);
                                 utils.saveAction(
@@ -273,7 +273,7 @@ public class VendorService {
                             responseDescription = "Invalid vendorId.";
                             tempVendorRepo.findById(tempVendor.getVendorId()).ifPresent(
                                     vendor -> {
-                                        if (tempVendor.getApprovalStatus() == null){
+                                        if (vendor.getApprovalStatus() == null){
                                             if (tempVendor.getOrgEmail().equalsIgnoreCase(vendor.getOrgEmail())) {
                                                 tempVendor.setOrgName(vendor.getOrgName());
                                                 tempVendor.setAction("NEW");
@@ -286,50 +286,34 @@ public class VendorService {
                                                 tempVendor.setRequestId(vendor.getRequestId());
                                                 tempVendor.setRemark(vendor.getRemark());
 
-                                                List<TempDocs> tempDocs = new ArrayList<>();
+//                                                List<TempDocs> tempDocs = new ArrayList<>();
                                                 tempVendor.getDocuments().forEach(
                                                         e ->{
-                                                            if (documents.contains(e.getFileName())) {
-                                                                AtomicReference<String> id = new AtomicReference<>(null);
-                                                                vendor.getDocuments()
-                                                                .stream()
-                                                                .filter(elem -> {
-                                                                    if (documents.contains(elem.getFileName())){
-                                                                        id.set(elem.getDocumentId());
-                                                                        return true;
-                                                                    }
-                                                                    return false;
-                                                                });
-                                                                e.setDocumentId(Optional.ofNullable(id.get()).orElse(UUID.randomUUID().toString()));
-                                                                e.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
-                                                                e.setTempVendor(tempVendor);
-                                                                tempDocs.add(e);
-                                                            }else responseDescription = "Expected documents [" +
-                                                                    "cac, tcc, vat, companyCert, amlcftcpQuestionaire, assessmentQuestionaire, companyProf" +
-                                                                    "]";
+                                                            e.setDocumentId((UUID.randomUUID().toString()));
+                                                            e.setUploadedAt(Timestamp.valueOf(LocalDateTime.now()));
+                                                            e.setTempVendor(tempVendor);
+//                                                            tempDocs.add(e);
                                                         }
                                                 );
-                                                tempVendor.setDocuments(tempDocs);
+//                                                tempVendor.setDocuments(tempDocs);
 
-                                                List<TempOwnedEquip> tempOwnedEquipList = new ArrayList<>();
+//                                                List<TempOwnedEquip> tempOwnedEquipList = new ArrayList<>();
                                                 tempVendor.getOwnedEquips().forEach(
                                                         equip ->{
                                                             equip.setTempVendor(tempVendor);
-                                                            tempOwnedEquipList.add(equip);
+//                                                            tempOwnedEquipList.add(equip);
                                                         }
                                                 );
+//                                                tempVendor.setOwnedEquips(tempOwnedEquipList);
 
-                                                tempVendor.setOwnedEquips(tempOwnedEquipList);
-
-                                                List<TempVerifiedClient> tempVerifiedClientList = new ArrayList<>();
+//                                                List<TempVerifiedClient> tempVerifiedClientList = new ArrayList<>();
                                                 tempVendor.getVerifiedClients().forEach(
                                                         clientele -> {
                                                             clientele.setTempVendor(tempVendor);
-                                                            tempVerifiedClientList.add(clientele);
+//                                                            tempVerifiedClientList.add(clientele);
                                                         }
                                                 );
-
-                                                tempVendor.setVerifiedClients(tempVerifiedClientList);;
+//                                                tempVendor.setVerifiedClients(tempVerifiedClientList);;
 
 
                                                 tempVendorRepo.save(tempVendor);
@@ -358,8 +342,8 @@ public class VendorService {
         data = node;
         if (node.has("staffId") && node.has("staffName") && node.has("vendorId") && node.has("action") && node.has("remark")){
             try{
-                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
-//                String staffRole = "APPROVER";
+//                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
+                String staffRole = "APPROVER";
                 if (staffRole != null){
 
                     if (staffRole.equalsIgnoreCase("APPROVER") || staffRole.equalsIgnoreCase("APPROVAL")){
@@ -640,8 +624,8 @@ public class VendorService {
         if (node.has("staffId") && node.has("vendorId") && node.has("action") && node.has("remark") && node.has("staffName")){
             if (node.get("action").asText().equalsIgnoreCase("BLACKLIST") || node.get("action").asText().equalsIgnoreCase("WHITELIST")){
 
-                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
-//                String staffRole = "INITIATOR";
+//                String staffRole = utils.role(node.get("staffId").asText()).get(0).get("roleName").asText();
+                String staffRole = "INITIATOR";
                 if (staffRole.equalsIgnoreCase("INITIATOR")){
                    try{
                        responseDescription = "Invalid vendorId";
@@ -716,8 +700,8 @@ public class VendorService {
         reset();
         String requestId = UUID.randomUUID().toString();
         try{
-            String staffRole = utils.role(tempVendor.getInitiatorId()).get(0).get("roleName").asText();
-//            String staffRole = "INITIATOR";
+//            String staffRole = utils.role(tempVendor.getInitiatorId()).get(0).get("roleName").asText();
+            String staffRole = "INITIATOR";
             if (staffRole.equalsIgnoreCase("INITIATOR")){
                 Object[] validate = utils.validate(tempVendor, new String[]{"approverId", "approvalStatus", "approverName", "status", "action", "createdAt","docsList", "approverRemark", "updatedAt"});
                 error = validate[1];
@@ -738,9 +722,7 @@ public class VendorService {
                                         tempVendor.setApprovalStatus("PENDING");
                                         tempVendor.setAction("UPDATE");
                                         tempVendor.setStatus(null);
-
-                                        System.out.println(tempVendor.getVerifiedClients());
-                                        System.out.println(tempVendor.getOwnedEquips());
+//                                        tempVendor.setInitiatorId();
 
 //                                        List<TempDocs> vendorDocuments = new ArrayList<>();
                                         tempVendor.getDocuments().forEach(
@@ -749,24 +731,24 @@ public class VendorService {
                                                 }
                                         );
 
-                                        List<TempOwnedEquip> tempOwnedEquipList = new ArrayList<>();
+//                                        List<TempOwnedEquip> tempOwnedEquipList = new ArrayList<>();
                                         tempVendor.getOwnedEquips().forEach(
                                                 equip ->{
                                                     equip.setTempVendor(tempVendor);
-                                                    tempOwnedEquipList.add(equip);
+//                                                    tempOwnedEquipList.add(equip);
                                                 }
                                         );
 
-                                        tempVendor.setOwnedEquips(tempOwnedEquipList);
+//                                        tempVendor.setOwnedEquips(tempOwnedEquipList);
 
-                                        List<TempVerifiedClient> tempVerifiedClientList = new ArrayList<>();
+//                                        List<TempVerifiedClient> tempVerifiedClientList = new ArrayList<>();
                                         tempVendor.getVerifiedClients().forEach(
                                                 clientele -> {
                                                     clientele.setTempVendor(tempVendor);
-                                                    tempVerifiedClientList.add(clientele);
+//                                                    tempVerifiedClientList.add(clientele);
                                                 }
                                         );
-                                        tempVendor.setVerifiedClients(tempVerifiedClientList);
+//                                        tempVendor.setVerifiedClients(tempVerifiedClientList);
                                         tempVendor.setRequestId(requestId);
 
                                         try {
@@ -815,8 +797,8 @@ public class VendorService {
         List<Object> errorList = new ArrayList<>();
         if (document.containsKey("vendorId") && document.containsKey("documents") && document.containsKey("staffId") && document.containsKey("staffName")){
 
-            String staffRole = utils.role(document.get("staffId").toString()).get(0).get("roleName").asText();
-//            String staffRole = "INITIATOR";
+//            String staffRole = utils.role(document.get("staffId").toString()).get(0).get("roleName").asText();
+            String staffRole = "INITIATOR";
            if (staffRole.equalsIgnoreCase("INITIATOR")){
                responseDescription = "Vendor does not exist Or not active!";
                vendorRepo.findById(document.get("vendorId").toString()).ifPresent(
