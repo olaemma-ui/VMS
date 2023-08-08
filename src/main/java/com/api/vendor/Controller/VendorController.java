@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -53,7 +52,6 @@ public class VendorController {
     private ResponseEntity<Response> getVendorDetails(@RequestBody JsonNode node){
         return vendorService.getVendorDetails(node, "");
     }
-
 
 
     @PostMapping(value = {"staff/pendingVendor/details"}, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -119,11 +117,6 @@ public class VendorController {
     private ResponseEntity<Response> updateVendor(@RequestBody TempVendor vendor){
         return vendorService.updateVendorDetails(vendor);
     }
-
-//    @PutMapping(value = {"staff/vendor/updateDocs"})
-//    private ResponseEntity<Response> updateVendorDocument(@RequestBody Map<String, Object> document){
-//        return vendorService.updateDocument(document);
-//    }
 
     @GetMapping(value = {"staff/activityLog"})
     private ResponseEntity<Response> getActivityLog() {

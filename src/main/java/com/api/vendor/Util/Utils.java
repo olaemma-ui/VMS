@@ -69,7 +69,7 @@ public class Utils {
                 }
             }
         }
-        return alpha;
+        return alpha.toLowerCase();
     }
 
 
@@ -172,15 +172,14 @@ public class Utils {
     }
 
 
-    public boolean sendMail (String mailTo, String message){
+    public boolean sendMail (String mailTo, String message, String vendorName){
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
 
         String htmlBody =
-                "<p>This is your vendorId for reference purpose</p>" +
-                    "<h1>"+message+"</h1>" +
-                "";
+                "<p>Dear "+vendorName+",</p>" +
+                    "<p> Your profile has been created follow the link to complete registration <br>"+message+"</p>";
 
         String request = "{\n" +
                 "        \"subject\" :\"SunTrust Vendor\",\n" +
@@ -283,7 +282,8 @@ public class Utils {
                     new HttpEntity<>(staffId),
                     JsonNode.class
             );
-
+            System.out.println("request = "+request);
+            System.out.println("response = "+request.getBody());
             if (request.getStatusCodeValue() == 200){
                 if (!Objects.requireNonNull(request.getBody()).isEmpty()){
                     return request.getBody();
